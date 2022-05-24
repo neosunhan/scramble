@@ -85,6 +85,12 @@ ul {
     text-shadow: 0 0 .5rem black;
   }
 
+  .pressed {
+    transform: scale(1.1);
+    border-color: #ffc600;
+    box-shadow: 0 0 1rem #ffc600;
+  }
+
   .correct {
       color: green;
   }

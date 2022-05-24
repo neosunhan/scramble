@@ -1,8 +1,9 @@
 const TEXT_URL = 'http://api.quotable.io/random'
 const textDisplayElement = document.getElementById('text-display');
 const userInputElement = document.getElementById('user-input');
+const keyDivList = document.querySelectorAll('.key');
+keyDivList.forEach(key => key.addEventListener('transitionend', removeTransition));
 let keys = [];
-
 for (let i = 0; i < 26; ++i) {
     keys[i] = 97 + i;
 }
@@ -24,13 +25,14 @@ document.addEventListener('keydown', e => {
                 capitalised = true;
                 value += 32;
             }
-            if (value >= 97 && value <= 122) {
-                let newChar = keys[value - 97];
-                if (capitalised == true) {
-                    newChar -= 32;
-                }
-                userInputElement.value += String.fromCharCode(newChar);
+            let newChar = keys[value - 97]; // Lowercase
+            const key = document.querySelector(`.key[data-key="${newChar - 32}"]`);
+            key.classList.add('pressed');
+            if (capitalised == true) {
+                newChar -= 32;
             }
+            userInputElement.value += String.fromCharCode(newChar);
+            
         }
         
         const textCharList = textDisplayElement.querySelectorAll('span');
@@ -53,16 +55,12 @@ document.addEventListener('keydown', e => {
     }
 }) 
 
-/*
-userInputElement.addEventListener('input', () => {
-    const textCharList = textDisplayElement.querySelectorAll('span');
-    const inputCharList = userInputElement.value.split('');
-    console.log("test");
-    /*
-    textCharList.forEach((charSpan, index) => {
-        const charCode = inputCharList[index].innerText.charCodeAt(0); // ASCII Value of character
-    });
-})*/
+function removeTransition(e) {
+    if (e.propertyName !== 'transform') {
+        return; 
+    }
+    this.classList.remove('pressed');
+}
 
 function shuffle(array) {
     let currentIndex = array.length,  randomIndex;
@@ -79,7 +77,6 @@ function shuffle(array) {
 
 function scrambleKeys() {
     shuffle(keys);
-    const keyDivList = document.querySelectorAll('.key');
     keyDivList.forEach(keyDiv => {
         const keyID = keyDiv.getAttribute('data-key');
         const child = document.getElementById(String.fromCharCode(keyID));
@@ -95,8 +92,6 @@ function scrambleKeys() {
         newChild.setAttribute("id", character);
         keyDiv.appendChild(newChild);
     })
-
-
 }
 
 function getRandomQuote() {
