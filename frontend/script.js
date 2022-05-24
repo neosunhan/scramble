@@ -34,23 +34,29 @@ document.addEventListener('keydown', e => {
             userInputElement.value += String.fromCharCode(newChar);
             
         }
-        
+        let correct = true;
         const textCharList = textDisplayElement.querySelectorAll('span');
         const inputCharList = userInputElement.value.split('');
         textCharList.forEach((charSpan, index) => {
             const character = inputCharList[index];
             console.log(character);
             if (character == null) {
+                correct = false;
                 charSpan.classList.remove('incorrect');
                 charSpan.classList.remove('correct');
             } else if (character == charSpan.innerText) {
                 charSpan.classList.add('correct');
                 charSpan.classList.remove('incorrect');
             } else {
+                correct = false;
                 charSpan.classList.add('incorrect');
                 charSpan.classList.remove('correct');
             }
         }) 
+
+        if (correct) {
+            getNextQuote();
+        }
 
     }
 }) 
