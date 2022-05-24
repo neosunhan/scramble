@@ -84,3 +84,12 @@ ul {
     background: rgba(0,0,0,0.4);
     text-shadow: 0 0 .5rem black;
   }
+
+  .correct {
+      color: green;
+  }
+
+  .incorrect {
+      color: red;
+      text-decoration: underline;
+  }

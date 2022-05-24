@@ -7,28 +7,48 @@ for (let i = 0; i < 26; ++i) {
     keys[i] = 97 + (i + 1) % 26;
 }
 
+function isLetter(str) {
+    return str.length === 1 && str.match(/[a-z]/i);
+}
+
 document.addEventListener('keydown', e => {
     if (document.activeElement == userInputElement) {
         let value = e.key;
         let capitalised = false;
-        if (value == "Shift" || value == "Control" || value == "Alt" || value == "CapsLock" || value == "Backspace" || value == " ") {
+        if (!isLetter(value)) {
             // do nothing
         } else {
             e.preventDefault();
             value = e.key.charCodeAt(0);
-        }
-    
-        if (value >= 65 && value <= 90) {
-            capitalised = true;
-            value += 32;
-        }
-        if (value >= 97 && value <= 122) {
-            let newChar = keys[value - 97];
-            if (capitalised == true) {
-                newChar -= 32;
+            if (value >= 65 && value <= 90) {
+                capitalised = true;
+                value += 32;
             }
-            userInputElement.value += String.fromCharCode(newChar);
+            if (value >= 97 && value <= 122) {
+                let newChar = keys[value - 97];
+                if (capitalised == true) {
+                    newChar -= 32;
+                }
+                userInputElement.value += String.fromCharCode(newChar);
+            }
         }
+
+        const textCharList = textDisplayElement.querySelectorAll('span');
+        const inputCharList = userInputElement.value.split('');
+        textCharList.forEach((charSpan, index) => {
+            const character = inputCharList[index];
+            console.log(character);
+            if (character == null) {
+                charSpan.classList.remove('incorrect');
+                charSpan.classList.remove('correct');
+            } else if (character == charSpan.innerText) {
+                charSpan.classList.add('correct');
+                charSpan.classList.remove('incorrect');
+            } else {
+                charSpan.classList.add('incorrect');
+                charSpan.classList.remove('correct');
+            }
+        }) 
 
     }
 }) 
@@ -74,7 +94,7 @@ async function getNextQuote() {
         charSpan.innerText = char;
         textDisplayElement.appendChild(charSpan);
     })
-    //quoteDisplayElement.innerText = quote;
+    //quoteDisplayElement.innerText = quot
 }
 
 getNextQuote();
