@@ -4,7 +4,7 @@ const userInputElement = document.getElementById('user-input');
 let keys = [];
 
 for (let i = 0; i < 26; ++i) {
-    keys[i] = 97 + (i + 1) % 26;
+    keys[i] = 97 + i;
 }
 
 function isLetter(str) {
@@ -32,7 +32,7 @@ document.addEventListener('keydown', e => {
                 userInputElement.value += String.fromCharCode(newChar);
             }
         }
-
+        
         const textCharList = textDisplayElement.querySelectorAll('span');
         const inputCharList = userInputElement.value.split('');
         textCharList.forEach((charSpan, index) => {
@@ -78,7 +78,25 @@ function shuffle(array) {
 }
 
 function scrambleKeys() {
-    
+    shuffle(keys);
+    const keyDivList = document.querySelectorAll('.key');
+    keyDivList.forEach(keyDiv => {
+        const keyID = keyDiv.getAttribute('data-key');
+        const child = document.getElementById(String.fromCharCode(keyID));
+        keyDiv.removeChild(child);
+        keyDiv.setAttribute("data-key", keys[keyID - 65] - 32);
+    })
+
+    keyDivList.forEach(keyDiv => {
+        const newChild = document.createElement('kbd');
+        const newID = keyDiv.getAttribute('data-key');
+        const character = String.fromCharCode(newID);
+        newChild.innerText = character;
+        newChild.setAttribute("id", character);
+        keyDiv.appendChild(newChild);
+    })
+
+
 }
 
 function getRandomQuote() {
@@ -88,13 +106,14 @@ function getRandomQuote() {
 
 async function getNextQuote() {
     const quote = await getRandomQuote();
+    scrambleKeys();
     textDisplayElement.innerHTML = '';
     quote.split('').forEach(char => {
         const charSpan = document.createElement('span');
         charSpan.innerText = char;
         textDisplayElement.appendChild(charSpan);
     })
-    //quoteDisplayElement.innerText = quot
+    userInputElement.value = null;
 }
 
 getNextQuote();
