@@ -17,7 +17,7 @@ body, .user-input {
 
 .timer {
     position: absolute;
-    font-size: 3rem;
+    font-size: 5rem;
     color: gold;
     font-weight: bold;
     top: 5rem;
@@ -34,7 +34,7 @@ body, .user-input {
     height: 15rem;
 }
 
-.text-display {
+.text-display { 
     font-size: 2rem;
     margin-bottom: 1rem;
     flex: 1;
@@ -44,9 +44,13 @@ body, .user-input {
     flex: 1;
     resize: none;
     background-color: transparent;
-    border: 2px solid rgb(92, 67, 3);
+    border: 3px solid rgb(201, 171, 1);
     outline: none;
     font-size: 1.5rem;
+}
+
+.user-input:focus {
+    border-color: black;
 }
 
 
@@ -75,7 +79,7 @@ ul {
     border: .4rem solid black;
     border-radius: .5rem;
     margin: 0 1rem;
-    font-size: 1.5rem;
+    font-size: 2rem;
     padding: 1rem .5rem;
     transition: all .07s ease;
     width: 8rem;

@@ -1,7 +1,10 @@
 const TEXT_URL = 'http://api.quotable.io/random'
 const textDisplayElement = document.getElementById('text-display');
 const userInputElement = document.getElementById('user-input');
+const timerElement = document.getElementById('timer');
 const keyDivList = document.querySelectorAll('.key');
+const gameDuration = 120;
+
 keyDivList.forEach(key => key.addEventListener('transitionend', removeTransition));
 let keys = [];
 for (let i = 0; i < 26; ++i) {
@@ -100,7 +103,7 @@ function shuffleWithinHands(array) {
 }
 
 function scrambleKeys() {
-    // shuffle(keys);
+    //shuffle(keys);
     shuffleWithinHands(keys)
     keyDivList.forEach(keyDiv => {
         const keyID = keyDiv.getAttribute('data-key');
@@ -134,6 +137,26 @@ async function getNextQuote() {
         textDisplayElement.appendChild(charSpan);
     })
     userInputElement.value = null;
+    startTimer();
+}
+
+let startTime;
+
+function startTimer() {
+    timerElement.innerText = gameDuration;
+    startTime = new Date();
+    const intervalID = setInterval(() => {
+                            const timeLeft = getTimerTime();
+                            timerElement.innerText = timeLeft;
+                            if (timeLeft == 0) {
+                                clearInterval(intervalID);
+                                getNextQuote();
+                            }
+                         }, 1000);
+}
+
+function getTimerTime() {
+    return gameDuration - Math.floor((new Date() - startTime) / 1000);
 }
 
 getNextQuote();
