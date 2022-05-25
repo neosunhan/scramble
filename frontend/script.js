@@ -12,13 +12,21 @@ function isLetter(str) {
     return str.length === 1 && str.match(/[a-z]/i);
 }
 
+function isPunctuation(str) {
+    return str.length === 1 && str.match(/[!"#$%&'()*+,-./:;<=>?@[\\\]^_`{|}~]/);
+}
+
 document.addEventListener('keydown', e => {
+    if (e.ctrlKey || e.altKey || e.metaKey) {
+        return;
+    }
     if (document.activeElement == userInputElement) {
         let value = e.key;
         let capitalised = false;
-        if (!isLetter(value)) {
-            // do nothing
-        } else {
+        if (isPunctuation(value) || value == " ") {
+            e.preventDefault();
+            userInputElement.value += value;
+        } else if (isLetter(value)) {
             e.preventDefault();
             value = e.key.charCodeAt(0);
             if (value >= 65 && value <= 90) {
@@ -32,14 +40,12 @@ document.addEventListener('keydown', e => {
                 newChar -= 32;
             }
             userInputElement.value += String.fromCharCode(newChar);
-            
         }
         let correct = true;
         const textCharList = textDisplayElement.querySelectorAll('span');
         const inputCharList = userInputElement.value.split('');
         textCharList.forEach((charSpan, index) => {
             const character = inputCharList[index];
-            console.log(character);
             if (character == null) {
                 correct = false;
                 charSpan.classList.remove('incorrect');
