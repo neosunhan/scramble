@@ -69,7 +69,7 @@ function removeTransition(e) {
 }
 
 function shuffle(array) {
-    let currentIndex = array.length,  randomIndex;
+    let currentIndex = array.length, randomIndex;
 
     while (currentIndex != 0) {
       randomIndex = Math.floor(Math.random() * currentIndex);
@@ -81,8 +81,21 @@ function shuffle(array) {
     return array;
 }
 
+function shuffleWithinHands(array) {
+    const left = ['q', 'w', 'e', 'r', 't', 'a', 's', 'd', 'f', 'g', 'z', 'x', 'c', 'v', 'b'].map(x => x.charCodeAt(0))
+    const right = ['y', 'u', 'i', 'o', 'p', 'h', 'j', 'k', 'l', 'n', 'm'].map(x => x.charCodeAt(0))
+    const shuffled = shuffle([...left]).concat(shuffle([...right]))
+    const combined = left.concat(right)
+
+    for (let i = 0; i < 26; ++i) {
+        array[i] = shuffled[combined.findIndex(element => element === 97 + i)];
+    }
+    return array
+}
+
 function scrambleKeys() {
-    shuffle(keys);
+    // shuffle(keys);
+    shuffleWithinHands(keys)
     keyDivList.forEach(keyDiv => {
         const keyID = keyDiv.getAttribute('data-key');
         const child = document.getElementById(String.fromCharCode(keyID));
