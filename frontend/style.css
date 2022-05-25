@@ -8,7 +8,7 @@ body {
     justify-content: center;
     align-items: center;
     margin: 0;
-    background-color: grey;
+    background-color: gray;
 }
 
 body, .user-input {
@@ -79,7 +79,7 @@ ul {
     border: .4rem solid black;
     border-radius: .5rem;
     margin: 0 1rem;
-    font-size: 2rem;
+    font-size: 2.1rem;
     padding: 1rem .5rem;
     transition: all .07s ease;
     width: 8rem;

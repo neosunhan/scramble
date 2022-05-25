@@ -19,6 +19,25 @@ function isPunctuation(str) {
     return str.length === 1 && str.match(/[!"#$%&'()*+,-./:;<=>?@[\\\]^_`{|}~]/);
 }
 
+function insertTextAtCursor(text, cursorStart, cursorEnd) {
+    const originalText = userInputElement.value;
+    if (cursorStart == 0 && cursorEnd == originalText.length) {
+        userInputElement.value = text;
+    } else if (cursorStart == 0) {
+        console.log("b");
+        userInputElement.value = text + originalText.substring(cursorEnd, originalText.length);
+        userInputElement.setSelectionRange(text.length, text.length);
+    } else if (cursorEnd == originalText.length) {
+        console.log("c");
+        userInputElement.value = originalText.substring(0, cursorStart) + text;
+    } else {
+        console.log("d");
+        userInputElement.value = originalText.substring(0, cursorStart) + text + originalText.substring(cursorEnd, originalText.length);  
+        userInputElement.setSelectionRange(cursorStart + text.length, cursorStart + text.length);
+    }
+}
+
+
 document.addEventListener('keydown', e => {
     if (e.ctrlKey || e.altKey || e.metaKey) {
         return;
@@ -26,9 +45,11 @@ document.addEventListener('keydown', e => {
     if (document.activeElement == userInputElement) {
         let value = e.key;
         let capitalised = false;
-        if (isPunctuation(value) || value == " ") {
+        const startIndex = userInputElement.selectionStart;
+        const endIndex = userInputElement.selectionEnd;
+        if (isPunctuation(value) || value == " " || value >= 0 && value <= 9) {
             e.preventDefault();
-            userInputElement.value += value;
+            insertTextAtCursor(value, startIndex, endIndex);
         } else if (isLetter(value)) {
             e.preventDefault();
             value = e.key.charCodeAt(0);
@@ -42,7 +63,9 @@ document.addEventListener('keydown', e => {
             if (capitalised == true) {
                 newChar -= 32;
             }
-            userInputElement.value += String.fromCharCode(newChar);
+            console.log(`selection start: ${userInputElement.selectionStart}`);
+            console.log(`selection end: ${userInputElement.selectionEnd}`);
+            insertTextAtCursor(String.fromCharCode(newChar), startIndex, endIndex);
         }
         let correct = true;
         const textCharList = textDisplayElement.querySelectorAll('span');
@@ -62,11 +85,10 @@ document.addEventListener('keydown', e => {
                 charSpan.classList.remove('correct');
             }
         }) 
-
+        
         if (correct) {
             getNextQuote();
         }
-
     }
 }) 
 
