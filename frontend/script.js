@@ -14,7 +14,7 @@ for (let i = 65; i < 91; i++) {
 }
 
 function isLetter(str) {
-    return str.length === 1 && str.match(/[a-zA-Z]/i);
+    return str.length === 1 && str.match(/[a-z]/i);
 }
 
 function isPunctuation(str) {
