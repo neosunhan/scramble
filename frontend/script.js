@@ -109,27 +109,31 @@ function shuffle(array) {
     return array;
 }
 
-function shuffleWithinHands(array) {
-    const left = ['q', 'w', 'e', 'r', 't', 'a', 's', 'd', 'f', 'g', 'z', 'x', 'c', 'v', 'b'].map(x => x.charCodeAt(0))
-    const right = ['y', 'u', 'i', 'o', 'p', 'h', 'j', 'k', 'l', 'n', 'm'].map(x => x.charCodeAt(0))
-    const shuffled = shuffle([...left]).concat(shuffle([...right]))
-    const combined = left.concat(right)
-
-    for (let i = 0; i < 26; ++i) {
-        array[i] = shuffled[combined.findIndex(element => element === 97 + i)];
+function scrambleHelper(mapping, withinHand = true) {
+    let combined, shuffled;
+    if (withinHand) {
+        const left = Array.from("QWERTASDFGZXCVB");
+        const right = Array.from("YUIOPHJKLNM");
+        shuffled = shuffle([...left]).concat(shuffle([...right]));
+        combined = left.concat(right);
     }
-    return array
+
+    update_mapping(mapping, combined, shuffled);
+}
+
+function update_mapping(mapping, original, shuffled) {
+    for (let i = 0; i < original.length; i++) {
+        mapping[original[i]] = shuffled[i];
+    }
+    return mapping;
 }
 
 function scrambleKeys() {
-    // shuffle(keys);
-    // shuffleWithinHands(keys)
+    scrambleHelper(keyboard_map);
     keyDivList.forEach(keyDiv => {
         const keyID = keyDiv.getAttribute('data-key');
         const letter = String.fromCharCode(keyID);
-        const child = document.getElementById(letter);
-        keyDiv.removeChild(child);
-        // keyDiv.setAttribute("data-key", keys[keyID - 65] - 32);
+        keyDiv.removeChild(document.getElementById(letter));
         keyDiv.setAttribute("data-key", keyboard_map[letter].charCodeAt(0));
     })
 
