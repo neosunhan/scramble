@@ -109,24 +109,32 @@ function shuffle(array) {
     return array;
 }
 
-function scrambleHelper(mapping, withinHand = true) {
-    let combined, shuffled;
-    if (withinHand) {
-        const left = Array.from("QWERTASDFGZXCVB");
-        const right = Array.from("YUIOPHJKLNM");
-        shuffled = shuffle([...left]).concat(shuffle([...right]));
-        combined = left.concat(right);
+function scrambleHelper(mapping, withinHand = true, withinRow = true) {
+    let divisions = [];
+    if (withinHand && withinRow) {
+        divisions = ["QWERT", "ASDFG", "ZXCVB", "YUIOP", "HJKL", "NM"];
+    } else if (withinHand) {
+        divisions = ["QWERTASDFGZXCVB", "YUIOPHJKLNM"];
+    } else if (withinRow) {
+        divisions = ["QWERTYUIOP", "ASDFGHJKL", "ZXCVBNM"];
+    } else {
+        divisions = ["QWERTYUIOPASDFGHJKLZXCVBNM"];
+    }
+    divisions = divisions.map(x => Array.from(x));
+
+    let original = [];
+    let shuffled = [];
+    for (let division of divisions) {
+        shuffled.push(...shuffle([...division]));
+        original.push(...division)
     }
 
-    update_mapping(mapping, combined, shuffled);
-}
-
-function update_mapping(mapping, original, shuffled) {
     for (let i = 0; i < original.length; i++) {
         mapping[original[i]] = shuffled[i];
     }
-    return mapping;
+    return mapping
 }
+
 
 function scrambleKeys() {
     scrambleHelper(keyboard_map);
