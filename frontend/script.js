@@ -6,13 +6,15 @@ const keyDivList = document.querySelectorAll('.key');
 const gameDuration = 120;
 
 keyDivList.forEach(key => key.addEventListener('transitionend', removeTransition));
-let keys = [];
-for (let i = 0; i < 26; ++i) {
-    keys[i] = 97 + i;
+
+const keyboard_map = {};
+for (let i = 65; i < 91; i++) {
+    const letter = String.fromCharCode(i);
+    keyboard_map[letter] = letter;
 }
 
 function isLetter(str) {
-    return str.length === 1 && str.match(/[a-z]/i);
+    return str.length === 1 && str.match(/[a-zA-Z]/i);
 }
 
 function isPunctuation(str) {
@@ -44,7 +46,6 @@ document.addEventListener('keydown', e => {
     }
     if (document.activeElement == userInputElement) {
         let value = e.key;
-        let capitalised = false;
         const startIndex = userInputElement.selectionStart;
         const endIndex = userInputElement.selectionEnd;
         if (isPunctuation(value) || value == " " || value >= 0 && value <= 9) {
@@ -52,20 +53,16 @@ document.addEventListener('keydown', e => {
             insertTextAtCursor(value, startIndex, endIndex);
         } else if (isLetter(value)) {
             e.preventDefault();
-            value = e.key.charCodeAt(0);
-            if (value >= 65 && value <= 90) {
-                capitalised = true;
-                value += 32;
-            }
-            let newChar = keys[value - 97]; // Lowercase
-            const key = document.querySelector(`.key[data-key="${newChar - 32}"]`);
+            const capitalised = value === value.toUpperCase()
+            let newChar = keyboard_map[value.toUpperCase()]
+            const key = document.querySelector(`.key[data-key="${newChar.charCodeAt(0)}"]`);
             key.classList.add('pressed');
-            if (capitalised == true) {
-                newChar -= 32;
+            if (!capitalised) {
+                newChar = newChar.toLowerCase();
             }
             console.log(`selection start: ${userInputElement.selectionStart}`);
             console.log(`selection end: ${userInputElement.selectionEnd}`);
-            insertTextAtCursor(String.fromCharCode(newChar), startIndex, endIndex);
+            insertTextAtCursor(newChar, startIndex, endIndex);
         }
         let correct = true;
         const textCharList = textDisplayElement.querySelectorAll('span');
@@ -125,13 +122,15 @@ function shuffleWithinHands(array) {
 }
 
 function scrambleKeys() {
-    //shuffle(keys);
-    shuffleWithinHands(keys)
+    // shuffle(keys);
+    // shuffleWithinHands(keys)
     keyDivList.forEach(keyDiv => {
         const keyID = keyDiv.getAttribute('data-key');
-        const child = document.getElementById(String.fromCharCode(keyID));
+        const letter = String.fromCharCode(keyID);
+        const child = document.getElementById(letter);
         keyDiv.removeChild(child);
-        keyDiv.setAttribute("data-key", keys[keyID - 65] - 32);
+        // keyDiv.setAttribute("data-key", keys[keyID - 65] - 32);
+        keyDiv.setAttribute("data-key", keyboard_map[letter].charCodeAt(0));
     })
 
     keyDivList.forEach(keyDiv => {
