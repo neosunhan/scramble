@@ -3,7 +3,7 @@ const textDisplayElement = document.getElementById('text-display');
 const userInputElement = document.getElementById('user-input');
 const timerElement = document.getElementById('timer');
 const keyDivList = document.querySelectorAll('.key');
-const gameDuration = 120;
+const gameDuration = 3;
 
 keyDivList.forEach(key => key.addEventListener('transitionend', removeTransition));
 
@@ -26,14 +26,11 @@ function insertTextAtCursor(text, cursorStart, cursorEnd) {
     if (cursorStart == 0 && cursorEnd == originalText.length) {
         userInputElement.value = text;
     } else if (cursorStart == 0) {
-        console.log("b");
         userInputElement.value = text + originalText.substring(cursorEnd, originalText.length);
         userInputElement.setSelectionRange(text.length, text.length);
     } else if (cursorEnd == originalText.length) {
-        console.log("c");
         userInputElement.value = originalText.substring(0, cursorStart) + text;
     } else {
-        console.log("d");
         userInputElement.value = originalText.substring(0, cursorStart) + text + originalText.substring(cursorEnd, originalText.length);  
         userInputElement.setSelectionRange(cursorStart + text.length, cursorStart + text.length);
     }
@@ -53,15 +50,14 @@ document.addEventListener('keydown', e => {
             insertTextAtCursor(value, startIndex, endIndex);
         } else if (isLetter(value)) {
             e.preventDefault();
-            const capitalised = value === value.toUpperCase()
-            let newChar = keyboard_map[value.toUpperCase()]
-            const key = document.querySelector(`.key[data-key="${newChar.charCodeAt(0)}"]`);
+            const capitalised = value === value.toUpperCase();
+            value = value.toUpperCase();
+            let newChar = keyboard_map[value];
+            const key = document.querySelector(`.key[data-key="${value.charCodeAt(0)}"]`);
             key.classList.add('pressed');
             if (!capitalised) {
                 newChar = newChar.toLowerCase();
             }
-            console.log(`selection start: ${userInputElement.selectionStart}`);
-            console.log(`selection end: ${userInputElement.selectionEnd}`);
             insertTextAtCursor(newChar, startIndex, endIndex);
         }
         let correct = true;
@@ -137,20 +133,20 @@ function scrambleHelper(mapping, withinHand = true, withinRow = true) {
 
 
 function scrambleKeys() {
-    scrambleHelper(keyboard_map);
     keyDivList.forEach(keyDiv => {
         const keyID = keyDiv.getAttribute('data-key');
-        const letter = String.fromCharCode(keyID);
-        keyDiv.removeChild(document.getElementById(letter));
-        keyDiv.setAttribute("data-key", keyboard_map[letter].charCodeAt(0));
+        const character = String.fromCharCode(keyID);
+        keyDiv.removeChild(document.getElementById(keyboard_map[character]));
     })
 
+    scrambleHelper(keyboard_map);
+
     keyDivList.forEach(keyDiv => {
+        const keyID = keyDiv.getAttribute('data-key');
+        const character = String.fromCharCode(keyID);
         const newChild = document.createElement('kbd');
-        const newID = keyDiv.getAttribute('data-key');
-        const character = String.fromCharCode(newID);
-        newChild.innerText = character;
-        newChild.setAttribute("id", character);
+        newChild.innerText = keyboard_map[character];
+        newChild.setAttribute("id", keyboard_map[character]);
         keyDiv.appendChild(newChild);
     })
 }
