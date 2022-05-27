@@ -3,7 +3,7 @@ const textDisplayElement = document.getElementById('text-display');
 const userInputElement = document.getElementById('user-input');
 const timerElement = document.getElementById('timer');
 const keyDivList = document.querySelectorAll('.key');
-const gameDuration = 3;
+const gameDuration = 100;
 
 keyDivList.forEach(key => key.addEventListener('transitionend', removeTransition));
 

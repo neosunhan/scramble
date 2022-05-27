@@ -31,7 +31,7 @@ body, .user-input {
     width: 1000px;
     border-radius: 1rem;
     max-width: 90%;
-    height: 15rem;
+    min-height: 15rem;
 }
 
 .text-display { 
@@ -41,7 +41,7 @@ body, .user-input {
 }
 
 .user-input {
-    flex: 1;
+    flex: 1 1 50%;
     resize: none;
     background-color: transparent;
     border: 3px solid rgb(201, 171, 1);
@@ -53,6 +53,14 @@ body, .user-input {
     border-color: black;
 }
 
+.correct {
+    color: green;
+}
+
+.incorrect {
+    color: red;
+    text-decoration: underline;
+}
 
 /*KEYBOARD*/
 
@@ -93,13 +101,4 @@ ul {
     transform: scale(1.1);
     border-color: #ffc600;
     box-shadow: 0 0 1rem #ffc600;
-  }
-
-  .correct {
-      color: green;
-  }
-
-  .incorrect {
-      color: red;
-      text-decoration: underline;
   }
