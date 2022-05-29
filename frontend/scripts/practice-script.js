@@ -170,8 +170,6 @@ async function getNextQuote() {
     })
     userInputElement.value = null;
     startTimer();
-    console.log(`withinHand: ${game_settings["withinHand"]}`);
-    console.log(`withinRow: ${game_settings["withinRow"]}`);
 }
 
 let startTime;
@@ -208,23 +206,23 @@ checkboxList.forEach(checkbox => {
 /* Play Button */
 const playButton = document.getElementById('header-play');
 const closePlayButton = document.getElementById('play-menu-close-button');
-const startGameButton = document.getElementById('start-game-button')
+const startGameButton = document.getElementById('start-game-button');
 
 playButton.addEventListener('click', () => {
     const modalContainer = document.getElementById('play-menu');
     modalContainer.classList.add('show-modal');
+    playButton.classList.add('clicked');
 });
 
 closePlayButton.addEventListener('click', () => {
     const modalContainer = document.getElementById('play-menu');
     modalContainer.classList.remove('show-modal');
+    playButton.classList.remove('clicked');
 });
 
 startGameButton.addEventListener('click', () => {
     const modalContainer = document.getElementById('play-menu');
     modalContainer.classList.remove('show-modal');
+    playButton.classList.remove('clicked');
     getNextQuote();
 })
-
-
-getNextQuote();
