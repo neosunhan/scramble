@@ -129,6 +129,7 @@
           <button class="modal-close-button" id="play-menu-close-button">X</button> 
         </div>
         <div class="game-settings-layer">
+          <div class="game-settings-title">Scrambling Mode</div>
           <label class="checkbox" for="shuffle-hands">
             <input class="checkbox-input" type="checkbox" name="withinHand" id="shuffle-hands" checked>
             <div class="checkbox-box"></div>
@@ -140,6 +141,11 @@
             <div class="checkbox-box"></div>
             Shuffle within row
           </label>
+          <hr>
+          <div class="game-settings-title">Time Setting: &nbsp;&nbsp;<span id="time-setting"></span></div>
+          <div class="slide-container">
+            <input type="range" min="1" max="240" value="120" id="time-slider">
+          </div>
         </div>
         <button id="start-game-button">Start Game</button>
       </div>

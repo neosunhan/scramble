@@ -203,7 +203,7 @@ ul {
     position: relative;
     display: flex;
     flex-direction: column;
-    height: 200px;
+    height: 320px;
     width: 400px;
     border: 1rem solid rgb(239, 241, 243);
     border-radius: 10px;
@@ -235,12 +235,49 @@ ul {
     flex: 1
 }
 
+.game-settings-title {
+    font-size: 18px;
+    font-weight: bold;
+}
+
 #start-game-button {
     font-size: 18px;
     font-weight: 400;
     background-color: #025802;
     color: white;
     border-radius: 10px;
+    cursor: pointer;
+    height: 35px;
+}
+
+/* CUSTOM SLIDER */
+#time-slider {
+    -webkit-appearance: none;
+    width: 100%;
+    height: 25px;
+    background: #d3d3d3;
+    outline: none;
+    opacity: 0.7;
+    -webkit-transition: 0.2s;
+    transition: opacity 0.2s;
+}
+
+#time-slider:hover {
+    opacity: 1;
+}
+
+#time-slider::-moz-range-thumb {
+    width: 25px; /* Set a specific slider handle width */
+    height: 25px; /* Slider handle height */
+    background: #04AA6D; /* Green background */
+    cursor: pointer; /* Cursor on hover */
+  }
+
+#time-slider::-webkit-slider-thumb {
+    -webkit-appearance: none;
+    width: 25px;
+    height: 25px;
+    background: #025802;
     cursor: pointer;
 }
 

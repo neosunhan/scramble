@@ -3,7 +3,7 @@ const textDisplayElement = document.getElementById('text-display');
 const userInputElement = document.getElementById('user-input');
 const timerElement = document.getElementById('timer');
 const keyDivList = document.querySelectorAll('.key');
-const gameDuration = 100;
+let gameDuration = 100;
 
 keyDivList.forEach(key => key.addEventListener('transitionend', removeTransition));
 
@@ -198,10 +198,16 @@ const checkboxList = document.querySelectorAll('input[type="checkbox"]');
 checkboxList.forEach(checkbox => {
     checkbox.addEventListener('change', () => {
         game_settings[checkbox.name] = checkbox.checked;
-        console.log(checkbox.name);
-        console.log(checkbox.checked);
     })
 })
+
+/* Time Slider */
+const timeSlider = document.getElementById("time-slider");
+const timeSetting = document.getElementById("time-setting");
+timeSetting.innerText = timeSlider.value + " secs";
+timeSlider.oninput = () => {
+    timeSetting.innerText = timeSlider.value + " secs";
+}
 
 /* Play Button */
 const playButton = document.getElementById('header-play');
@@ -224,5 +230,7 @@ startGameButton.addEventListener('click', () => {
     const modalContainer = document.getElementById('play-menu');
     modalContainer.classList.remove('show-modal');
     playButton.classList.remove('clicked');
+    gameDuration = timeSlider.value;
     getNextQuote();
 })
+
