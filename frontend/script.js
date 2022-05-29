@@ -7,7 +7,8 @@ const gameDuration = 100;
 
 keyDivList.forEach(key => key.addEventListener('transitionend', removeTransition));
 
-const keyboard_map = {};
+const keyboard_map = {withinHand: false, withinRow: false};
+const game_settings = {"withinHand": true, "withinRow" : true};
 for (let i = 65; i < 91; i++) {
     const letter = String.fromCharCode(i);
     keyboard_map[letter] = letter;
@@ -105,7 +106,9 @@ function shuffle(array) {
     return array;
 }
 
-function scrambleHelper(mapping, withinHand = true, withinRow = true) {
+function scrambleHelper(mapping) {
+    const withinHand = game_settings["withinHand"];
+    const withinRow = game_settings["withinRow"];
     let divisions = [];
     if (withinHand && withinRow) {
         divisions = ["QWERT", "ASDFG", "ZXCVB", "YUIOP", "HJKL", "NM"];
@@ -128,7 +131,7 @@ function scrambleHelper(mapping, withinHand = true, withinRow = true) {
     for (let i = 0; i < original.length; i++) {
         mapping[original[i]] = shuffled[i];
     }
-    return mapping
+    return mapping;
 }
 
 
@@ -167,6 +170,8 @@ async function getNextQuote() {
     })
     userInputElement.value = null;
     startTimer();
+    console.log(`withinHand: ${game_settings["withinHand"]}`);
+    console.log(`withinRow: ${game_settings["withinRow"]}`);
 }
 
 let startTime;
@@ -177,7 +182,7 @@ function startTimer() {
     const intervalID = setInterval(() => {
                             const timeLeft = getTimerTime();
                             timerElement.innerText = timeLeft;
-                            if (timeLeft == 0) {
+                            if (timeLeft <= 0) {
                                 clearInterval(intervalID);
                                 getNextQuote();
                             }
@@ -187,5 +192,39 @@ function startTimer() {
 function getTimerTime() {
     return gameDuration - Math.floor((new Date() - startTime) / 1000);
 }
+
+/* Button Event Listeners */
+
+/* Game Setting Checkbox */
+const checkboxList = document.querySelectorAll('input[type="checkbox"]');
+checkboxList.forEach(checkbox => {
+    checkbox.addEventListener('change', () => {
+        game_settings[checkbox.name] = checkbox.checked;
+        console.log(checkbox.name);
+        console.log(checkbox.checked);
+    })
+})
+
+/* Play Button */
+const playButton = document.getElementById('header-play');
+const closePlayButton = document.getElementById('play-menu-close-button');
+const startGameButton = document.getElementById('start-game-button')
+
+playButton.addEventListener('click', () => {
+    const modalContainer = document.getElementById('play-menu');
+    modalContainer.classList.add('show-modal');
+});
+
+closePlayButton.addEventListener('click', () => {
+    const modalContainer = document.getElementById('play-menu');
+    modalContainer.classList.remove('show-modal');
+});
+
+startGameButton.addEventListener('click', () => {
+    const modalContainer = document.getElementById('play-menu');
+    modalContainer.classList.remove('show-modal');
+    getNextQuote();
+})
+
 
 getNextQuote();
