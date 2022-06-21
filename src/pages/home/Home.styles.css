@@ -1,0 +1,53 @@
+.main-menu {
+  background-color: black;
+  height: 100vh;
+  padding: 10% 2%;
+}
+
+.main-menu-container {
+  display: flex;
+  flex-direction: column;
+  justify-content: flex-start;
+  align-items: flex-start;
+  height: 100%;
+  width: 80%;
+  gap: 120px;
+  margin: auto;
+  color: #90ee90;
+  padding: 0 50px;
+}
+
+.enter-game {
+  display: flex;
+  flex-direction: column;
+  align-items: flex-start;
+  gap: 30px;
+  font-size: 50px;
+}
+
+.practice-yourself {
+  display: flex;
+  flex-direction: column;
+  align-items: flex-start;
+  gap: 30px;
+  font-size: 50px;
+}
+
+.main-menu-button {
+  font-size: 50px;
+  border: none;
+  background: none;
+  color: #d3d3d3;
+  cursor: pointer;
+  padding: 0.25em 0.5em;
+  border: 3px solid;
+  border-radius: 1em;
+  box-shadow: inset 0 0 0 0 #f9e506;
+  transition: ease-out 0.3s;
+}
+
+.main-menu-button:hover {
+  box-shadow: inset 450px 0 0 0 #f9e506;
+  cursor: pointer;
+  color: black;
+}
