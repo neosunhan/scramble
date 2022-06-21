@@ -13,6 +13,7 @@ interface PracticePopupProps {
 
 const PracticePopup: React.FC<PracticePopupProps> = ({ onSubmit, toggleClose }) => {
   const [options, setOptions] = useState({
+    noShuffle: false,
     withinHand: true,
     withinRow: true,
     time: 120,

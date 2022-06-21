@@ -1,23 +1,23 @@
 import React, { useEffect, useState } from 'react'
 import { Keyboard, Timer, TextArea, TextDisplay } from 'components'
-import { keyboardPositions } from 'utils/keyboard'
+import { keyboardMap } from 'utils/keyboard'
 
 interface PracticeGameProps {
-  keys: string[]
+  keys: keyboardMap
   quote: string
   time: number
   started: boolean
   startGame: () => void
 }
 
-const mapInput = (keys: string[], char: string): string => {
+const mapInput = (keys: keyboardMap, char: string): string => {
   const upperChar = char.toUpperCase()
-  const newChar = keys[keyboardPositions.indexOf(upperChar)] ?? char
+  const newChar = keys[upperChar as keyof keyboardMap] ?? char
   const isUpper = upperChar == char
   return isUpper ? newChar : newChar.toLowerCase()
 }
 
-const handleChangeInput = (prev: string, input: string, keys: string[]) => {
+const handleChangeInput = (prev: string, input: string, keys: keyboardMap) => {
   if (prev.length >= input.length) {
     return prev.slice(0, input.length)
   }
