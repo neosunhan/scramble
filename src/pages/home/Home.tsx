@@ -16,7 +16,9 @@ const Home: React.FC = () => {
         {user ? (
           <div className={styles.enterGame}>
             <div>Create a room or join an existing room to be matched with an opponent!</div>
-            <button className={styles.mainMenuButton}>Enter Game</button>
+            <Link to='lobby'>
+              <button className={styles.mainMenuButton}>Enter Game</button>
+            </Link>
           </div>
         ) : (
           <div className={styles.enterGame}>
