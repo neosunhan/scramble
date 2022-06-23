@@ -1,8 +1,6 @@
-import { initializeApp } from 'firebase/app'
 import {
   confirmPasswordReset as confirmPasswordResetFirebase,
   createUserWithEmailAndPassword,
-  getAuth,
   GoogleAuthProvider,
   sendPasswordResetEmail as sendPasswordResetEmailFirebase,
   signInWithEmailAndPassword,
@@ -10,11 +8,9 @@ import {
   User,
   UserCredential,
 } from 'firebase/auth'
-import { firebaseConfig } from 'config/firebaseConfig'
+import { firebaseAuth } from 'config/firebaseConfig'
 import React, { useState, useEffect, useContext, createContext } from 'react'
 
-const app = initializeApp(firebaseConfig)
-const firebaseAuth = getAuth(app)
 const googleAuthProvider = new GoogleAuthProvider()
 
 interface AuthContextProps {
