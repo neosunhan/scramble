@@ -1,0 +1,13 @@
+.userInput {
+  flex: 1 1 50%;
+  resize: none;
+  background-color: transparent;
+  border: 3px solid #282828;
+  outline: none;
+  font-size: 1.5rem;
+  color: #c8c8c8;
+}
+
+.userInput:focus {
+  border-color: black;
+}

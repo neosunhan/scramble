@@ -1,0 +1,32 @@
+.checkbox {
+  display: inline-flex;
+  align-items: center;
+  cursor: pointer;
+}
+
+.checkboxInput {
+  display: none;
+}
+
+.checkboxBox {
+  width: 1.25em;
+  height: 1.25em;
+  border: 2px solid #cccccc;
+  border-radius: 3px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  margin-right: 10px;
+  flex-shrink: 0;
+  transition: background 0.15s, border-color 0.15s;
+}
+
+.checkboxBox::after {
+  content: '\2714';
+  color: white;
+}
+
+.checkboxInputChecked + .checkboxBox {
+  background: #025802;
+  border-color: #025802;
+}

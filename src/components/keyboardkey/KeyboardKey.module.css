@@ -1,0 +1,19 @@
+.key {
+  border: 0.4rem solid black;
+  border-radius: 0.5rem;
+  margin: 0 1rem;
+  font-size: 2.1rem;
+  padding: 1rem 0.5rem;
+  transition: all 0.07s ease;
+  width: 8rem;
+  text-align: center;
+  color: #e8e8e8;
+  background: rgba(0, 0, 0, 0.4);
+  text-shadow: 0 0 0.5rem black;
+}
+
+.pressed {
+  transform: scale(1.1);
+  border-color: #ffc600;
+  box-shadow: 0 0 1rem #ffc600;
+}

@@ -1,0 +1,15 @@
+.textDisplay {
+  font-size: 2rem;
+  margin-bottom: 1rem;
+  color: #c8c8c8;
+  flex: 1;
+}
+
+.correct {
+  color: #90ee90;
+}
+
+.incorrect {
+  color: red;
+  text-decoration: underline;
+}
