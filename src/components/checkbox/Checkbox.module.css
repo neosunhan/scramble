@@ -4,11 +4,11 @@
   cursor: pointer;
 }
 
-.checkbox-input {
+.checkboxInput {
   display: none;
 }
 
-.checkbox-box {
+.checkboxBox {
   width: 1.25em;
   height: 1.25em;
   border: 2px solid #cccccc;
@@ -21,12 +21,12 @@
   transition: background 0.15s, border-color 0.15s;
 }
 
-.checkbox-box::after {
+.checkboxBox::after {
   content: '\2714';
   color: white;
 }
 
-.checkbox-input-checked {
+.checkboxInputChecked + .checkboxBox {
   background: #025802;
   border-color: #025802;
 }

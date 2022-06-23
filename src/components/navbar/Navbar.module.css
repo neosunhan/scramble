@@ -1,5 +1,5 @@
 /* HEADER BAR */
-.header-bar {
+.headerBar {
   display: flex;
   justify-content: space-between;
   align-items: center;
@@ -10,8 +10,8 @@
   padding: 0 5em;
 }
 
-.left-bar,
-.right-bar {
+.leftBar,
+.rightBar {
   display: flex;
   align-items: center;
   gap: 2.5em;

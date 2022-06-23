@@ -2,7 +2,8 @@ import React, { useEffect, useState } from 'react'
 import { Keyboard, Timer, TextArea, TextDisplay } from 'components'
 import { keyboardMap } from 'utils/keyboard'
 
-interface PracticeGameProps {
+import styles from './Game.module.css'
+interface GameProps {
   keys: keyboardMap
   quote: string
   time: number
@@ -24,7 +25,7 @@ const handleChangeInput = (prev: string, input: string, keys: keyboardMap) => {
   return prev + mapInput(keys, input.charAt(input.length - 1))
 }
 
-const PracticeGame: React.FC<PracticeGameProps> = ({ keys, quote, time, started, startGame }) => {
+const Game: React.FC<GameProps> = ({ keys, quote, time, started, startGame }) => {
   const [input, setInput] = useState('')
 
   const handleChange = (e: React.ChangeEvent<HTMLTextAreaElement>) => {
@@ -41,15 +42,15 @@ const PracticeGame: React.FC<PracticeGameProps> = ({ keys, quote, time, started,
   }, [started])
 
   return (
-    <div className='game-window'>
+    <div className={styles.gameWindow}>
       <Timer time={time} />
       <TextDisplay quote={quote} input={input} />
-      <div className='container'>
+      <div className={styles.container}>
         <TextArea input={input} onChange={handleChange} />
       </div>
-      <Keyboard keys={keys} setInput={setInput}></Keyboard>
+      <Keyboard keys={keys}></Keyboard>
     </div>
   )
 }
 
-export default PracticeGame
+export default Game

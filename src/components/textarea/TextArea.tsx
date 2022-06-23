@@ -1,12 +1,19 @@
 import React from 'react'
 
+import styles from './TextArea.module.css'
 interface TextAreaProps {
   input: string
   onChange: React.ChangeEventHandler<HTMLTextAreaElement>
 }
 const TextArea: React.FC<TextAreaProps> = ({ input, onChange }) => {
   return (
-    <textarea className='user-input' id='user-input' value={input} onChange={onChange}></textarea>
+    <textarea
+      className={styles.userInput}
+      id='user-input'
+      value={input}
+      onChange={onChange}
+      autoFocus
+    ></textarea>
   )
 }
 

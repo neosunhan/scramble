@@ -1,26 +1,24 @@
 import React from 'react'
 
-import './Checkbox.styles.css'
+import styles from './Checkbox.module.css'
 
 interface CheckboxProps {
   name: string
   label: string
   checked: boolean
-  onClick: React.MouseEventHandler<HTMLDivElement>
+  onClick: React.MouseEventHandler<HTMLLabelElement>
 }
 
-const Checkbox: React.FC<CheckboxProps> = ({ name, label, checked, onClick }) => {
+const Checkbox: React.FC<CheckboxProps> = ({ label, checked, onClick }) => {
   return (
-    <div onClick={onClick}>
+    <label onClick={onClick} className={styles.checkbox}>
       <input
-        className={checked ? 'checkbox-input-checked' : 'checkbox-input'}
+        className={styles.checkboxInput + ' ' + (checked ? styles.checkboxInputChecked : '')}
         type='checkbox'
-        name={name}
-        checked={checked}
       />
-      <div className='checkbox-box'></div>
-      <label className='checkbox'>{label}</label>
-    </div>
+      <div className={styles.checkboxBox}></div>
+      {label}
+    </label>
   )
 }
 

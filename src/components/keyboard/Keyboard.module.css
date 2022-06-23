@@ -1,0 +1,11 @@
+.keyboard {
+
+}
+
+.keyboardRow {
+  display: flex;
+  flex: 1;
+  min-height: 10vh;
+  align-items: center;
+  justify-content: center;
+}

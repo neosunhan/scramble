@@ -1,5 +1,7 @@
 import React from 'react'
 
+import styles from './TextDisplay.module.css'
+
 interface TextDisplayProps {
   quote: string
   input: string
@@ -7,14 +9,14 @@ interface TextDisplayProps {
 
 const TextDisplay: React.FC<TextDisplayProps> = ({ quote, input }) => {
   return (
-    <div className='text-display' id='text-display'>
+    <div className={styles.textDisplay}>
       {Array.from(quote).map((char, index) => {
         let className: string
         if (index < input.length) {
           if (char === input.charAt(index)) {
-            className = 'correct'
+            className = styles.correct
           } else {
-            className = 'incorrect'
+            className = styles.incorrect
           }
         } else {
           className = ''

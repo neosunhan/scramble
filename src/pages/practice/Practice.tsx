@@ -1,6 +1,6 @@
-import React, { useEffect, useState, useRef } from 'react'
+import React, { useEffect, useState } from 'react'
 import { generateKeyboard, keyboardMap, unshuffledMap } from 'utils/keyboard'
-import { PracticeGame } from 'components'
+import { Game } from 'components'
 
 import { PracticePopup } from 'pages/practice/PracticePopup'
 import { getQuote } from 'api/quotes'
@@ -63,7 +63,7 @@ const Practice: React.FC = () => {
 
   return (
     <>
-      <PracticeGame keys={keys} quote={quote} time={time} started={started} startGame={startGame} />
+      <Game keys={keys} quote={quote} time={time} started={started} startGame={startGame} />
       {popupOpen && (
         <PracticePopup toggleClose={() => setPopupOpen(false)} onSubmit={loadOptions} />
       )}

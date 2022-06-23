@@ -1,6 +1,6 @@
 import React from 'react'
 
-import './Button.styles.css'
+import styles from './Button.module.css'
 
 interface ButtonProps {
   onClick?: React.MouseEventHandler<HTMLButtonElement>
@@ -10,7 +10,7 @@ interface ButtonProps {
 
 const Button: React.FC<ButtonProps> = ({ ...props }) => {
   return (
-    <button className={'custom-button ' + props.className ?? ''} onClick={props.onClick}>
+    <button className={styles.customButton + ' ' + (props.className ?? '')} onClick={props.onClick}>
       {props.children}
     </button>
   )

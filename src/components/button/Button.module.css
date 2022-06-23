@@ -1,4 +1,4 @@
-.custom-button {
+.customButton {
   border: none;
   background: none;
   color: #d3d3d3;
@@ -8,4 +8,12 @@
   border: 3px solid;
   border-radius: 1em;
   position: relative;
+  transition: ease-out 0.3s;
 }
+
+.customButton:hover {
+  box-shadow: inset 200px 0 0 0 #f9e506;
+  cursor: pointer;
+  color: black;
+}
+

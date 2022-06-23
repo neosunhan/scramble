@@ -3,21 +3,28 @@ import React from 'react'
 import { Link } from 'react-router-dom'
 import { Button } from 'components'
 
-import './Home.styles.css'
+import styles from './Home.module.css'
+import { useAuth } from 'hooks/useAuth'
 
 const Home: React.FC = () => {
+  const { user } = useAuth()
+
   return (
-    <div className='main-menu'>
-      <div className='main-menu-container'>
+    <div className={styles.mainMenu}>
+      <div className={styles.mainMenuContainer}>
         {/* <div className="welcome-text">Welcome to Scramble</div> */}
-        <div className='enter-game'>
-          <div>Create a room or join an existing room to be matched with an opponent!</div>
-          <button className='main-menu-button'>Enter Game</button>
-        </div>
-        <div className='practice-yourself'>
+        {user ? (
+          <div className={styles.enterGame}>
+            <div>Create a room or join an existing room to be matched with an opponent!</div>
+            <button className={styles.mainMenuButton}>Enter Game</button>
+          </div>
+        ) : (
+          <div>Not logged in</div>
+        )}
+        <div className={styles.practiceYourself}>
           <div>Learn the basics here!</div>
           <Link to='practice'>
-            <Button className='main-menu-button'>Practice Yourself</Button>
+            <Button className={styles.mainMenuButton}>Practice Yourself</Button>
           </Link>
         </div>
       </div>

@@ -5,5 +5,5 @@ interface Quote {
 }
 
 export function getQuote() {
-  return axios.get<Quote>('http://api.quotable.io/random')
+  return axios.get<Quote>('https://api.quotable.io/random')
 }

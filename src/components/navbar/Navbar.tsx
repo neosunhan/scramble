@@ -3,19 +3,26 @@ import { Link } from 'react-router-dom'
 
 import { Button } from 'components'
 
-import './Navbar.styles.css'
+import styles from './Navbar.module.css'
+import { useAuth } from 'hooks/useAuth'
 
 const Navbar: React.FC = () => {
+  const { user, signInWithGoogle, signout } = useAuth()
+
   return (
-    <div className='header-bar'>
-      <div className='left-bar'>
-        <Link className='title' to='/'>
+    <div className={styles.headerBar}>
+      <div className={styles.leftBar}>
+        <Link className={styles.title} to='/'>
           Scramble.
         </Link>
       </div>
-      <div className='right-bar'>
+      <div className={styles.rightBar}>
         <Button>Create Account</Button>
-        <Button>Sign In</Button>
+        {user ? (
+          <Button onClick={signout}>Sign Out</Button>
+        ) : (
+          <Button onClick={signInWithGoogle}>Sign In with Google</Button>
+        )}
       </div>
     </div>
   )

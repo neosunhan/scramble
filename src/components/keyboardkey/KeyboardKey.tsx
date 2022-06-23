@@ -1,6 +1,6 @@
 import React, { useEffect, useState } from 'react'
 
-import './KeyboardKey.styles.css'
+import styles from './KeyboardKey.module.css'
 
 interface KeyboardKeyProps {
   letter: string
@@ -23,7 +23,7 @@ const KeyboardKey: React.FC<KeyboardKeyProps> = ({ letter, pressed, setPressed }
   }, [pressed])
 
   return (
-    <div className={animate ? 'key pressed' : 'key'}>
+    <div className={styles.key + (animate ? ' ' + styles.pressed : '')}>
       <kbd>{letter}</kbd>
     </div>
   )

@@ -1,10 +1,10 @@
-.main-menu {
+.mainMenu {
   background-color: black;
   height: 100vh;
   padding: 10% 2%;
 }
 
-.main-menu-container {
+.mainMenuContainer {
   display: flex;
   flex-direction: column;
   justify-content: flex-start;
@@ -17,7 +17,7 @@
   padding: 0 50px;
 }
 
-.enter-game {
+.enterGame {
   display: flex;
   flex-direction: column;
   align-items: flex-start;
@@ -25,7 +25,7 @@
   font-size: 50px;
 }
 
-.practice-yourself {
+.practiceYourself {
   display: flex;
   flex-direction: column;
   align-items: flex-start;
@@ -33,7 +33,7 @@
   font-size: 50px;
 }
 
-.main-menu-button {
+.mainMenuButton {
   font-size: 50px;
   border: none;
   background: none;
@@ -46,7 +46,7 @@
   transition: ease-out 0.3s;
 }
 
-.main-menu-button:hover {
+.mainMenuButton:hover {
   box-shadow: inset 450px 0 0 0 #f9e506;
   cursor: pointer;
   color: black;
