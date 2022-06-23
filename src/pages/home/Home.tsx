@@ -19,7 +19,9 @@ const Home: React.FC = () => {
             <button className={styles.mainMenuButton}>Enter Game</button>
           </div>
         ) : (
-          <div>Not logged in</div>
+          <div className={styles.enterGame}>
+            <div>Sign in to play against other players!</div>
+          </div>
         )}
         <div className={styles.practiceYourself}>
           <div>Learn the basics here!</div>
