@@ -17,9 +17,12 @@ const Navbar: React.FC = () => {
         </Link>
       </div>
       <div className={styles.rightBar}>
-        <Button>Create Account</Button>
+        {/* <Button>Create Account</Button> */}
         {user ? (
-          <Button onClick={signout}>Sign Out</Button>
+          <>
+            <div>{user.displayName}</div>
+            <Button onClick={signout}>Sign Out</Button>
+          </>
         ) : (
           <Button onClick={signInWithGoogle}>Sign In with Google</Button>
         )}
