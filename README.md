@@ -1,6 +1,9 @@
 # scramble
 
-### Getting Started
+## Try It Out!
+https://scramble-vert.vercel.app/
+
+## Getting Started
 1. Install Yarn for dependency management.
 ```
 $ npm install --global yarn
@@ -14,7 +17,7 @@ $ yarn
 $ yarn start
 ```
 
-### Linting
+## Linting
 This project makes use of the Typescript compiler, ESLint and Prettier for static code analysis.
 Before making any commits, run the linter via:
 ```
