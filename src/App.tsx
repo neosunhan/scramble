@@ -3,7 +3,7 @@ import './App.css'
 import { BrowserRouter as Router, Routes, Route } from 'react-router-dom'
 
 import { Navbar } from 'components'
-import { Home, Practice } from 'pages'
+import { Home, Practice, Lobby, Room } from 'pages'
 
 function App() {
   return (
@@ -11,7 +11,9 @@ function App() {
       <Navbar />
       <Routes>
         <Route path='/' element={<Home />} />
-        <Route path='/practice' element={<Practice />} />
+        <Route path='practice' element={<Practice />} />
+        <Route path='lobby' element={<Lobby />} />
+        <Route path='lobby/:roomId' element={<Room />} />
       </Routes>
     </Router>
   )
