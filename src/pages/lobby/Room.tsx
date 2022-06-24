@@ -46,6 +46,11 @@ const Room: React.FC = () => {
         <Link to='/lobby'>
           <button onClick={leaveRoom}>Leave Room</button>
         </Link>
+        {user?.uid === roomId ? (
+          <button>Start game</button>
+        ) : (
+          <div>Wait for the host to start the game!</div>
+        )}
       </div>
     </div>
   )
