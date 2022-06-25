@@ -3,21 +3,32 @@ import { useAuth } from 'hooks/useAuth'
 import { database } from 'config/firebaseConfig'
 import { ref, set } from 'firebase/database'
 import { Link, useNavigate } from 'react-router-dom'
+import { generateKeyboard } from 'utils/keyboard'
+import { GameOptions } from 'pages/play/Play'
 
 const Lobby: React.FC = () => {
   const [roomToJoin, setRoomToJoin] = useState('')
   const { user } = useAuth()
   const navigate = useNavigate()
 
+  const gameOptions: GameOptions = {
+    noShuffle: false,
+    withinHand: true,
+    withinRow: true,
+    time: 120,
+  }
+
   const createRoom = () => {
     const userId: string = user?.uid as string
     const roomId: string = userId
     set(ref(database, `rooms/${roomId}`), {
-      host: userId,
       players: {
         [userId]: user?.displayName,
       },
       started: false,
+      gameOptions: gameOptions,
+      quotes: { 0: 'Quote 0', 1: 'Quote 1' },
+      keyMap: generateKeyboard(gameOptions),
     })
   }
 
