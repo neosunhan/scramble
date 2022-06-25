@@ -4,6 +4,8 @@ import { database } from 'config/firebaseConfig'
 import { ref, set } from 'firebase/database'
 import { Link, useNavigate } from 'react-router-dom'
 
+import styles from './Lobby.module.css'
+
 const Lobby: React.FC = () => {
   const [roomToJoin, setRoomToJoin] = useState('')
   const { user } = useAuth()
@@ -28,15 +30,32 @@ const Lobby: React.FC = () => {
   }
 
   return (
-    <div>
-      <div>Create a room or join another player&apos;s room!</div>
-      <Link to={user?.uid as string}>
-        <button onClick={createRoom}>Create room</button>
-      </Link>
-      <form onSubmit={joinRoom}>
-        <input type='text' value={roomToJoin} onChange={(e) => setRoomToJoin(e.target.value)} />
-        <input type='submit' value='Join Room'></input>
-      </form>
+    <div className={styles.lobby}>
+      <div className={styles.lobbyContainer}>
+        <div className={styles.createRoom}>
+          <div>Click on this to host a game!</div>
+          <Link to={user?.uid as string}>
+            <button className={styles.lobbyButton} onClick={createRoom}>
+              Create room
+            </button>
+          </Link>
+        </div>
+        <div className={styles.joinRoom}>
+          <form onSubmit={joinRoom}>
+            <div className={styles.joinRoomContainer}>
+              <div>Have a code to an existing room?</div>
+              <input
+                className={styles.roomInput}
+                type='text'
+                value={roomToJoin}
+                onChange={(e) => setRoomToJoin(e.target.value)}
+                autoFocus
+              />
+              <input className={styles.lobbyButton} type='submit' value='Join Room'></input>
+            </div>
+          </form>
+        </div>
+      </div>
     </div>
   )
 }
