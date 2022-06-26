@@ -1,4 +1,4 @@
-import React, { useEffect, useState } from 'react'
+import React, { RefObject, useEffect, useState } from 'react'
 import { Keyboard, Timer, TextArea, TextDisplay } from 'components'
 import { keyboardMap } from 'utils/keyboard'
 
@@ -18,21 +18,71 @@ const mapInput = (keys: keyboardMap, char: string): string => {
   return isUpper ? newChar : newChar.toLowerCase()
 }
 
-const handleChangeInput = (prev: string, input: string, keys: keyboardMap) => {
-  if (prev.length >= input.length) {
-    return prev.slice(0, input.length)
-  }
-  return prev + mapInput(keys, input.charAt(input.length - 1))
+function isInput(str: string) {
+  return isLetter(str) || isOtherKey(str)
+}
+
+function isLetter(str: string) {
+  return str.length === 1 && str.match(/[a-z]/i)
+}
+
+function isOtherKey(str: string) {
+  return str.length === 1 && str.match(/[!"#$%&'()*+,-./:;<=>?@[\\\]^_`{|}~123456789 \b]/)
 }
 
 const Game: React.FC<GameProps> = ({ keys, quote, time, started, startGame }) => {
   const [input, setInput] = useState('')
+  const [cursor, setCursor] = useState(0)
+  const userInputElement = React.useRef<HTMLTextAreaElement>(null)
 
-  const handleChange = (e: React.ChangeEvent<HTMLTextAreaElement>) => {
-    if (!started) {
-      startGame()
+  const insertTextAtCursor = (
+    prev: string,
+    input: string,
+    currentStart: number,
+    currentEnd: number,
+  ): string => {
+    if (currentStart == 0) {
+      setCursor(input.length)
+      return input + prev.substring(currentEnd, prev.length)
+    } else if (currentEnd == prev.length) {
+      setCursor(currentStart + input.length)
+      return prev.substring(0, currentStart) + input
+    } else {
+      setCursor(currentStart + input.length)
+      return prev.substring(0, currentStart) + input + prev.substring(currentEnd, prev.length)
     }
-    setInput((prev) => handleChangeInput(prev, e.target.value, keys))
+  }
+
+  const backspaceAtCursor = (prev: string, currentStart: number, currentEnd: number): string => {
+    if (currentStart == currentEnd) {
+      if (currentStart != 0) {
+        setCursor(currentStart - 1)
+        return prev.substring(0, currentStart - 1) + prev.substring(currentStart, prev.length)
+      } else {
+        return prev
+      }
+    } else {
+      return insertTextAtCursor(prev, '', currentStart, currentEnd)
+    }
+  }
+
+  const handleKeyDown = (e: React.KeyboardEvent<HTMLTextAreaElement>) => {
+    if (e.ctrlKey || e.altKey || e.metaKey) {
+      return
+    }
+    if (document.activeElement == userInputElement.current) {
+      if (!started) {
+        startGame()
+      }
+      const value = e.key
+      const startIndex = userInputElement.current!.selectionStart
+      const endIndex = userInputElement.current!.selectionEnd
+      if (isInput(value)) {
+        setInput((prev) => insertTextAtCursor(prev, mapInput(keys, value), startIndex, endIndex))
+      } else if (value == 'Backspace') {
+        setInput((prev) => backspaceAtCursor(prev, startIndex, endIndex))
+      }
+    }
   }
 
   useEffect(() => {
@@ -46,7 +96,17 @@ const Game: React.FC<GameProps> = ({ keys, quote, time, started, startGame }) =>
       <Timer time={time} />
       <TextDisplay quote={quote} input={input} />
       <div className={styles.container}>
-        <TextArea input={input} onChange={handleChange} />
+        <textarea
+          className={styles.userInput}
+          ref={userInputElement}
+          value={input}
+          onChange={() => {
+            window.requestAnimationFrame(() => {
+              userInputElement.current!.setSelectionRange(cursor, cursor)
+            })
+          }}
+          onKeyDown={handleKeyDown}
+        ></textarea>
       </div>
       <Keyboard keys={keys}></Keyboard>
     </div>
