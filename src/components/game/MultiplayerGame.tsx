@@ -1,7 +1,7 @@
 import React, { useEffect, useState } from 'react'
 import { Keyboard, Timer, TextArea, TextDisplay } from 'components'
 import { keyboardMap } from 'utils/keyboard'
-
+import { GameEnd } from './GameEnd'
 import styles from './Game.module.css'
 import { useAuth } from 'hooks/useAuth'
 import { DatabaseReference, onValue, ref, set } from 'firebase/database'
@@ -48,6 +48,8 @@ const MultiplayerGame: React.FC<MultiplayerGameProps> = ({
   const [input, setInput] = useState('')
   const [opponentInput, setOpponentInput] = useState('')
   const dbInputRef = ref(database, `rooms/${roomId}/textInput/${user?.uid}`)
+  const [gameResult, setGameResult] = useState('Tie!')
+  const [gameEnd, setGameEnd] = useState(false)
 
   const handleChange = (e: React.ChangeEvent<HTMLTextAreaElement>) => {
     setInput((prev) => handleChangeInput(prev, e.target.value, keys, dbInputRef))
@@ -67,7 +69,24 @@ const MultiplayerGame: React.FC<MultiplayerGameProps> = ({
         console.log('Opponent input not in db')
       }
     })
+    if (opponentInput == quote) {
+      setGameResult('You lost!')
+      setGameEnd(true)
+    }
   })
+
+  useEffect(() => {
+    if (input == quote) {
+      setGameResult('You won!')
+      setGameEnd(true)
+    }
+  }, [input])
+
+  useEffect(() => {
+    if (time == 0) {
+      setGameEnd(true)
+    }
+  }, [time])
 
   return (
     <div className={styles.gameWindow}>
@@ -79,6 +98,8 @@ const MultiplayerGame: React.FC<MultiplayerGameProps> = ({
         <TextArea input={input} onChange={handleChange} />
       </div>
       <Keyboard keys={keys}></Keyboard>
+
+      {gameEnd && <GameEnd outcomeMessage={gameResult} toggleClose={() => 1} />}
     </div>
   )
 }

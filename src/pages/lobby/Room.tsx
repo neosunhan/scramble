@@ -37,7 +37,6 @@ const Room: React.FC = () => {
 
   useEffect(() => {
     const playersRef = ref(database, `/rooms/${roomId}/players`)
-
     onValue(playersRef, (snapshot) => {
       setPlayers(snapshot.val())
     })
@@ -65,7 +64,7 @@ const Room: React.FC = () => {
             <button className={styles.tab}> Lobby</button>
             <button className={styles.tab}>Customise</button>
           </div>
-          <div className={styles.waitingForPlayers}> Waiting for Players... (1/4)</div>
+          <div className={styles.waitingForPlayers}> Waiting for Opponent...</div>
           <div className={styles.playerList}>
             {Object.entries(players).map((entry) => {
               const userId = entry[0]
