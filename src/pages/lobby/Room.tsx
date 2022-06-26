@@ -5,6 +5,8 @@ import { database } from 'config/firebaseConfig'
 import { useAuth } from 'hooks/useAuth'
 import { getQuote } from 'api/quotes'
 
+import styles from './Room.module.css'
+
 const Room: React.FC = () => {
   const { roomId } = useParams()
   const { user } = useAuth()
@@ -49,31 +51,46 @@ const Room: React.FC = () => {
   })
 
   return (
-    <div>
-      <div>
-        <h1>Room: {roomId}</h1>
-        <h3>Players: </h3>
-        <div>
-          {Object.entries(players).map((entry) => {
-            const userId = entry[0]
-            let userName = entry[1]
-            if (userId === user?.uid) {
-              userName += ' (You)'
-            }
-            if (userId === roomId) {
-              userName += ' (Host)'
-            }
-            return <div key={userId}>{userName as string}</div>
-          })}
+    <div className={styles.room}>
+      <div className={styles.roomContainer}>
+        <div className={styles.roomHeader}>
+          <div>Room:</div>
+          <div>{roomId}</div>
         </div>
-        <Link to='/lobby'>
-          <button onClick={leaveRoom}>Leave Room</button>
-        </Link>
-        {user?.uid === roomId ? (
-          <button onClick={startGame}>Start game</button>
-        ) : (
-          <div>Wait for the host to start the game!</div>
-        )}
+        <div className={styles.roomMenu}>
+          <div className={styles.tabList}>
+            <button className={styles.tab}> Lobby</button>
+            <button className={styles.tab}>Customise</button>
+          </div>
+          <div className={styles.waitingForPlayers}> Waiting for Players... (1/4)</div>
+          <div className={styles.playerList}>
+            {Object.entries(players).map((entry) => {
+              const userId = entry[0]
+              let userName = entry[1]
+              if (userId === user?.uid) {
+                userName += ' (You)'
+              }
+              if (userId === roomId) {
+                userName += ' (Host)'
+              }
+              return <div key={userId}>{userName as string}</div>
+            })}
+          </div>
+          <div className={styles.menuButtonContainer}>
+            {user?.uid === roomId ? (
+              <button className={styles.startButton} onClick={startGame}>
+                Start game
+              </button>
+            ) : (
+              <div className={styles.waitMessage}>Wait for the host to start the game!</div>
+            )}
+            <Link to='/lobby'>
+              <button className={styles.leaveButton} onClick={leaveRoom}>
+                Leave Room
+              </button>
+            </Link>
+          </div>
+        </div>
       </div>
     </div>
   )
