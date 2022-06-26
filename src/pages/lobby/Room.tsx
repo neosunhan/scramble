@@ -3,7 +3,6 @@ import { Link, useParams, useNavigate } from 'react-router-dom'
 import { remove, ref, onValue, set } from 'firebase/database'
 import { database } from 'config/firebaseConfig'
 import { useAuth } from 'hooks/useAuth'
-import { getQuote } from 'api/quotes'
 
 const Room: React.FC = () => {
   const { roomId } = useParams()
@@ -20,14 +19,18 @@ const Room: React.FC = () => {
   }
 
   const startGame = () => {
-    // const quotes: { [index: number]: string } = {}
-    // for (let i = 0; i < 5; i++) {
-    //   getQuote().then((response) => {
-    //     quotes[i] = response.data.content
-    //   })
-    // }
-    // set(ref(database, `rooms/${roomId}/quotes`), quotes)
-    set(ref(database, `rooms/${roomId}/started`), true)
+    let numPlayers = 0
+    const textInput: { [input: string]: string } = {}
+    for (const player in players) {
+      numPlayers++
+      textInput[player] = ''
+    }
+    if (numPlayers === 2) {
+      set(ref(database, `rooms/${roomId}/textInput`), textInput)
+      set(ref(database, `rooms/${roomId}/started`), true)
+    } else {
+      alert('Number of players is not 2!')
+    }
   }
 
   useEffect(() => {
@@ -35,6 +38,7 @@ const Room: React.FC = () => {
 
     onValue(playersRef, (snapshot) => {
       setPlayers(snapshot.val())
+      console.log('Check db for players')
     })
   }, [roomId])
 
@@ -43,12 +47,13 @@ const Room: React.FC = () => {
 
     onValue(startedRef, (snapshot) => {
       if (snapshot.val()) {
+        console.log('check db for started')
         navigate(`/play/${roomId}`)
       }
     })
   })
 
-  return (
+  return players ? (
     <div>
       <div>
         <h1>Room: {roomId}</h1>
@@ -76,6 +81,8 @@ const Room: React.FC = () => {
         )}
       </div>
     </div>
+  ) : (
+    <div>{`Room ${roomId} is not open`}</div>
   )
 }
 

@@ -1,13 +1,15 @@
-import React, { useState } from 'react'
+import React, { useEffect, useState } from 'react'
 import { useAuth } from 'hooks/useAuth'
 import { database } from 'config/firebaseConfig'
 import { ref, set } from 'firebase/database'
 import { Link, useNavigate } from 'react-router-dom'
 import { generateKeyboard } from 'utils/keyboard'
 import { GameOptions } from 'pages/play/Play'
+import { getQuote } from 'api/quotes'
 
 const Lobby: React.FC = () => {
   const [roomToJoin, setRoomToJoin] = useState('')
+  const [quote, setQuote] = useState('Cannot get quote')
   const { user } = useAuth()
   const navigate = useNavigate()
 
@@ -27,7 +29,7 @@ const Lobby: React.FC = () => {
       },
       started: false,
       gameOptions: gameOptions,
-      quotes: { 0: 'Quote 0', 1: 'Quote 1' },
+      quote: quote,
       keyMap: generateKeyboard(gameOptions),
     })
   }
@@ -37,6 +39,13 @@ const Lobby: React.FC = () => {
     set(ref(database, `rooms/${roomToJoin}/players/${user?.uid}`), user?.displayName)
     navigate(roomToJoin)
   }
+
+  useEffect(() => {
+    getQuote().then((response) => {
+      console.log(response.data.content)
+      setQuote(response.data.content)
+    })
+  }, [])
 
   return (
     <div>

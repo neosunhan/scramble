@@ -8,7 +8,6 @@ interface TextDisplayProps {
 }
 
 const TextDisplay: React.FC<TextDisplayProps> = ({ quote, input }) => {
-  console.log(quote)
   return (
     <div className={styles.textDisplay}>
       {Array.from(quote).map((char, index) => {
