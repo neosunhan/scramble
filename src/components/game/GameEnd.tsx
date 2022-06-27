@@ -60,7 +60,6 @@ const GameEnd: React.FC<GameEndProps> = ({ outcomeMessage }) => {
     onValue(roomRef, (snapshot) => {
       if (snapshot.exists()) {
         console.log(snapshot)
-        console.log('check db for started')
         setHostRematch(true)
       }
     })
