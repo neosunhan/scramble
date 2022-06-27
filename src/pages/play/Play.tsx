@@ -18,11 +18,11 @@ const Play: React.FC = () => {
   const [keys, setKeys] = useState<keyboardMap>(unshuffledMap)
   const [players, setPlayers] = useState({})
 
-  const [time, setTime] = useState(5)
+  const [time, setTime] = useState(110)
 
   const [startTime, setStartTime] = useState(Date.now())
 
-  let gameDuration = 5
+  let gameDuration = time
   useEffect(() => {
     get(ref(database, `rooms/${roomId}`))
       .then((snapshot) => {
