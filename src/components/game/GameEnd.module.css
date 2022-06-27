@@ -19,12 +19,62 @@
     pointer-events: auto;
   }
 
+  .modalCloseButton {
+    border: none;
+    background: none;
+    color: black;
+    cursor: pointer;
+  }
+  
   .gameEndWindow {
     position: relative;
     display: flex;
     flex-direction: column;
-    height: 320px;
+    height: 160px;
     width: 400px;
     border: 1rem solid rgb(239, 241, 243);
     border-radius: 10px;
+    background-color: white;
+  }
+
+  .playMenuHeaderBar {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    padding-bottom: 0.3em;
+    background-color: rgb(239, 241, 243);
+  }
+
+  .playMenuTitle {
+    font-size: 30px;
+    font-weight: bold;
+  }
+
+  .buttonList {
+    display: flex;
+    flex-direction: column;
+    flex: 1;
+  }
+
+  .rematchButton {
+    flex:1;
+    font-size: 20px;
+    font-weight: 500;
+    background-color: #025802;
+    color: white;
+    cursor: pointer;  
+  }
+
+  .lobbyButtonContainer {
+    flex: 1;
+  }
+
+  .lobbyButton {
+    font-size: 20px;
+    font-weight: 500;
+    background-color: orange;
+    color: black;
+    cursor: pointer;  
+    height: 100%;
+    width: 100%;
   }

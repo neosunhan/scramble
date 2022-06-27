@@ -12,10 +12,23 @@ const GameEnd: React.FC<GameEndProps> = ({ outcomeMessage, toggleClose }) => {
   return (
     <div className={styles.modalContainer + ' ' + styles.showModal} id='play-menu'>
       <div className={styles.gameEndWindow}>
-        <div>{outcomeMessage}</div>
-        <Link to='/lobby'>
-          <button className={styles.backToLobbyButton}>Back to lobby</button>
-        </Link>
+        <div className={styles.playMenuHeaderBar}>
+          <div className={styles.playMenuTitle}>{outcomeMessage}</div>
+          <button
+            className={styles.modalCloseButton + ' ' + styles.playMenuCloseButton}
+            onClick={toggleClose}
+          >
+            X
+          </button>
+        </div>
+        <div className={styles.buttonList}>
+          <button className={styles.rematchButton}>Rematch</button>
+          <div className={styles.lobbyButtonContainer}>
+            <Link to='/lobby'>
+              <button className={styles.lobbyButton}>Back to lobby</button>
+            </Link>
+          </div>
+        </div>
       </div>
     </div>
   )

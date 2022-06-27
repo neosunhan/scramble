@@ -18,7 +18,7 @@ const Play: React.FC = () => {
   const [keys, setKeys] = useState<keyboardMap>(unshuffledMap)
   const [players, setPlayers] = useState({})
 
-  const [time, setTime] = useState(0)
+  const [time, setTime] = useState(100)
 
   const [startTime, setStartTime] = useState(Date.now())
 
@@ -48,6 +48,10 @@ const Play: React.FC = () => {
     }, 100)
     return () => clearInterval(interval)
   }, [startTime])
+
+  useEffect(() => {
+    setStartTime(Date.now())
+  }, [])
 
   useEffect(() => {
     if (time === 0) {
