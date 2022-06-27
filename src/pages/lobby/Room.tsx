@@ -40,7 +40,6 @@ const Room: React.FC = () => {
 
     onValue(playersRef, (snapshot) => {
       setPlayers(snapshot.val())
-      console.log('Check db for players')
     })
   }, [roomId])
 
@@ -49,7 +48,6 @@ const Room: React.FC = () => {
 
     onValue(startedRef, (snapshot) => {
       if (snapshot.val()) {
-        console.log('check db for started')
         navigate(`/play/${roomId}`)
       }
     })

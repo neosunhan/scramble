@@ -45,7 +45,6 @@ const Lobby: React.FC = () => {
 
   useEffect(() => {
     getQuote().then((response) => {
-      console.log(response.data.content)
       setQuote(response.data.content)
     })
   }, [])

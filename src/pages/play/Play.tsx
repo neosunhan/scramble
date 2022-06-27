@@ -26,7 +26,6 @@ const Play: React.FC = () => {
   useEffect(() => {
     get(ref(database, `rooms/${roomId}`))
       .then((snapshot) => {
-        console.log('Read from db')
         if (snapshot.exists()) {
           const roomObj = snapshot.val()
           setQuote(roomObj['quote'])
@@ -35,7 +34,6 @@ const Play: React.FC = () => {
           gameDuration = roomObj['gameOptions']['time']
           setPlayers(roomObj['players'])
         } else {
-          console.log(`Room ${roomId} does not exist`)
         }
       })
       .catch((error) => {
