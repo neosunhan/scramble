@@ -33,3 +33,13 @@
 .userInput:focus {
   border-color: black;
 }
+
+.opponentDisplay { 
+  color: #c8c8c8;
+  font-size: 20px;
+  width: 100%;
+}
+
+.separator {
+  width: 100%;
+}

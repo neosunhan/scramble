@@ -1,31 +1,104 @@
-import React, { useState } from 'react'
-import { Link } from 'react-router-dom'
+import React, { useEffect, useState } from 'react'
+import { Link, useParams, useNavigate } from 'react-router-dom'
+import { useAuth } from 'hooks/useAuth'
+import { remove, ref, onValue, set } from 'firebase/database'
+import { database } from 'config/firebaseConfig'
+import { getQuote } from 'api/quotes'
+import { generateKeyboard } from 'utils/keyboard'
+import { defaultGameOptions } from 'components/firebase/RoomFunctions'
 
 import styles from './GameEnd.module.css'
 
 interface GameEndProps {
   outcomeMessage: string
-  toggleClose: () => void
 }
 
-const GameEnd: React.FC<GameEndProps> = ({ outcomeMessage, toggleClose }) => {
+const GameEnd: React.FC<GameEndProps> = ({ outcomeMessage }) => {
+  const { user } = useAuth()
+  const { roomId } = useParams()
+  const [quote, setQuote] = useState('Cannot get quote')
+  const [hostRematch, setHostRematch] = useState(false)
+  const [guestRematch, setGuestRematch] = useState(false)
+  const navigate = useNavigate()
+
+  useEffect(() => {
+    getQuote().then((response) => {
+      console.log(response.data.content)
+      setQuote(response.data.content)
+    })
+  }, [])
+
+  const createRoom = () => {
+    const userId: string = user?.uid as string
+    set(ref(database, `rooms/${roomId}`), {
+      host: userId,
+      players: {},
+      started: false,
+      gameOptions: defaultGameOptions,
+      quote: quote,
+      keyMap: generateKeyboard(defaultGameOptions),
+    })
+  }
+
+  const joinRoom = () => {
+    set(ref(database, `rooms/${roomId}/players/${user?.uid}`), user?.displayName)
+    navigate(`/lobby/${roomId}`)
+  }
+
+  const hostWantRematch = () => {
+    createRoom()
+    joinRoom()
+  }
+
+  const guestWantRematch = () => {
+    setGuestRematch(true)
+  }
+
+  useEffect(() => {
+    const roomRef = ref(database, `/rooms/${roomId}`)
+
+    onValue(roomRef, (snapshot) => {
+      if (snapshot.exists()) {
+        console.log(snapshot)
+        console.log('check db for started')
+        setHostRematch(true)
+      }
+    })
+  })
+
+  useEffect(() => {
+    if (user?.uid != roomId && guestRematch) {
+      joinRoom()
+    }
+  }, [hostRematch])
+
+  useEffect(() => {
+    if (user?.uid != roomId && hostRematch) {
+      joinRoom()
+    }
+  }, [guestRematch])
+
   return (
     <div className={styles.modalContainer + ' ' + styles.showModal} id='play-menu'>
       <div className={styles.gameEndWindow}>
-        <div className={styles.playMenuHeaderBar}>
-          <div className={styles.playMenuTitle}>{outcomeMessage}</div>
-          <button
-            className={styles.modalCloseButton + ' ' + styles.playMenuCloseButton}
-            onClick={toggleClose}
-          >
-            X
-          </button>
+        <div className={styles.gameEndHeaderBar}>
+          <div className={styles.outcomeMessage}>{outcomeMessage}</div>
         </div>
         <div className={styles.buttonList}>
-          <button className={styles.rematchButton}>Rematch</button>
+          {user?.uid == roomId ? (
+            <button className={styles.rematchButton} onClick={hostWantRematch}>
+              Rematch
+            </button>
+          ) : guestRematch ? (
+            <div className={styles.waitingForHost}>Waiting for host...</div>
+          ) : (
+            <button className={styles.rematchButton} onClick={guestWantRematch}>
+              Rematch
+            </button>
+          )}
           <div className={styles.lobbyButtonContainer}>
             <Link to='/lobby'>
-              <button className={styles.lobbyButton}>Back to lobby</button>
+              <button className={styles.lobbyButton}>Return to lobby</button>
             </Link>
           </div>
         </div>

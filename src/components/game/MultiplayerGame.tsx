@@ -4,7 +4,7 @@ import { keyboardMap } from 'utils/keyboard'
 import { GameEnd } from './GameEnd'
 import styles from './Game.module.css'
 import { useAuth } from 'hooks/useAuth'
-import { DatabaseReference, onValue, ref, set } from 'firebase/database'
+import { remove, DatabaseReference, onValue, ref, set } from 'firebase/database'
 import { database } from 'config/firebaseConfig'
 interface MultiplayerGameProps {
   roomId: string
@@ -61,6 +61,12 @@ const MultiplayerGame: React.FC<MultiplayerGameProps> = ({
       opponent = player
     }
   }
+
+  const endGame = () => {
+    setGameEnd(true)
+    remove(ref(database, `rooms/${roomId}`))
+  }
+
   useEffect(() => {
     onValue(ref(database, `rooms/${roomId}/textInput/${opponent}`), (snapshot) => {
       if (snapshot.exists()) {
@@ -71,35 +77,36 @@ const MultiplayerGame: React.FC<MultiplayerGameProps> = ({
     })
     if (opponentInput == quote) {
       setGameResult('You lost!')
-      setGameEnd(true)
+      endGame()
     }
   })
 
   useEffect(() => {
     if (input == quote) {
       setGameResult('You won!')
-      setGameEnd(true)
+      endGame()
     }
   }, [input])
 
   useEffect(() => {
     if (time == 0) {
-      setGameEnd(true)
+      endGame()
     }
   }, [time])
 
   return (
     <div className={styles.gameWindow}>
-      <Timer time={time} />
-      <div>{`${players[opponent]}: `}</div>
+      <Timer time={gameEnd ? 0 : time} />
+      <div className={styles.opponentDisplay}>{`${players[opponent]} is typing...`}</div>
       <TextDisplay quote={quote} input={opponentInput} />
+      <hr className={styles.separator}></hr>
       <TextDisplay quote={quote} input={input} />
       <div className={styles.container}>
         <TextArea input={input} onChange={handleChange} />
       </div>
       <Keyboard keys={keys}></Keyboard>
 
-      {gameEnd && <GameEnd outcomeMessage={gameResult} toggleClose={() => 1} />}
+      {gameEnd && <GameEnd outcomeMessage={gameResult} />}
     </div>
   )
 }

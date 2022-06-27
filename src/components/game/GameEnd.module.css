@@ -18,13 +18,6 @@
     opacity: 1;
     pointer-events: auto;
   }
-
-  .modalCloseButton {
-    border: none;
-    background: none;
-    color: black;
-    cursor: pointer;
-  }
   
   .gameEndWindow {
     position: relative;
@@ -37,7 +30,7 @@
     background-color: white;
   }
 
-  .playMenuHeaderBar {
+  .gameEndHeaderBar {
     display: flex;
     justify-content: space-between;
     align-items: center;
@@ -45,9 +38,10 @@
     background-color: rgb(239, 241, 243);
   }
 
-  .playMenuTitle {
+  .outcomeMessage {
     font-size: 30px;
     font-weight: bold;
+    padding: 5px;
   }
 
   .buttonList {
@@ -77,4 +71,11 @@
     cursor: pointer;  
     height: 100%;
     width: 100%;
+  }
+
+  .waitingForHost {
+    font-size: 20px;
+    flex: 1;
+    text-align: center;
+    padding: 8px 0px;
   }
