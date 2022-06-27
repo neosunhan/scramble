@@ -62,12 +62,12 @@ const Practice: React.FC = () => {
   }
 
   return (
-    <>
+    <div>
       <Game keys={keys} quote={quote} time={time} started={started} startGame={startGame} />
       {popupOpen && (
         <PracticePopup toggleClose={() => setPopupOpen(false)} onSubmit={loadOptions} />
       )}
-    </>
+    </div>
   )
 }
 

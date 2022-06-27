@@ -1,4 +1,4 @@
-* {
+ * {
   box-sizing: border-box;
 }
 
@@ -91,6 +91,10 @@ body {
 .gameSettingsTitle {
   font-size: 18px;
   font-weight: bold;
+}
+
+.rematchButton {
+  flex:1;
 }
 
 .startGameButton {

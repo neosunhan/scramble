@@ -7,12 +7,15 @@ html * {
     'Open Sans', 'Helvetica Neue', sans-serif;
 }
 
-html,
-body {
+html, body {
   height: 100%;
 }
 
 body {
   min-height: 100vh;
   margin: 0;
+}
+
+body > #root > div + div {
+  height: 100vh;
 }
