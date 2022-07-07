@@ -25,7 +25,6 @@ const Lobby: React.FC = () => {
     const userId: string = user?.uid as string
     const roomId: string = userId
     set(ref(database, `rooms/${roomId}`), {
-      host: userId,
       players: {
         [userId]: user?.displayName,
       },
