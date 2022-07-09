@@ -116,7 +116,6 @@ const MultiplayerGame: React.FC<MultiplayerGameProps> = ({
 
   useEffect(() => {
     onValue(ref(database, `rooms/${roomId}/textInput/${opponent}`), (snapshot) => {
-      console.log('test')
       if (snapshot.exists()) {
         setOpponentInput(snapshot.val())
       } else {
