@@ -21,20 +21,16 @@ const mapInput = (keys: keyboardMap, char: string): string => {
   return isUpper ? newChar : newChar.toLowerCase()
 }
 
-const handleChangeInput = (
-  prev: string,
-  input: string,
-  keys: keyboardMap,
-  dbRef: DatabaseReference,
-) => {
-  let newString: string
-  if (prev.length >= input.length) {
-    newString = prev.slice(0, input.length)
-  } else {
-    newString = prev + mapInput(keys, input.charAt(input.length - 1))
-  }
-  set(dbRef, newString)
-  return newString
+function isInput(str: string) {
+  return isLetter(str) || isOtherKey(str)
+}
+
+function isLetter(str: string) {
+  return str.length === 1 && str.match(/[a-z]/i)
+}
+
+function isOtherKey(str: string) {
+  return str.length === 1 && str.match(/[!"#$%&'()*+,-./:;<=>?@[\\\]^_`{|}~123456789 \b]/)
 }
 
 const MultiplayerGame: React.FC<MultiplayerGameProps> = ({
@@ -47,12 +43,63 @@ const MultiplayerGame: React.FC<MultiplayerGameProps> = ({
   const { user } = useAuth()
   const [input, setInput] = useState('')
   const [opponentInput, setOpponentInput] = useState('')
+  const [cursor, setCursor] = useState(0)
   const dbInputRef = ref(database, `rooms/${roomId}/textInput/${user?.uid}`)
   const [gameResult, setGameResult] = useState('Tie!')
   const [gameEnd, setGameEnd] = useState(false)
+  const userInputElement = React.useRef<HTMLTextAreaElement>(null)
 
-  const handleChange = (e: React.ChangeEvent<HTMLTextAreaElement>) => {
-    setInput((prev) => handleChangeInput(prev, e.target.value, keys, dbInputRef))
+  const insertTextAtCursor = (
+    prev: string,
+    input: string,
+    currentStart: number,
+    currentEnd: number,
+  ): string => {
+    let newString: string
+    if (currentStart == 0) {
+      setCursor(input.length)
+      newString = input + prev.substring(currentEnd, prev.length)
+    } else if (currentEnd == prev.length) {
+      setCursor(currentStart + input.length)
+      newString = prev.substring(0, currentStart) + input
+    } else {
+      setCursor(currentStart + input.length)
+      newString = prev.substring(0, currentStart) + input + prev.substring(currentEnd, prev.length)
+    }
+    set(dbInputRef, newString)
+    return newString
+  }
+
+  const backspaceAtCursor = (prev: string, currentStart: number, currentEnd: number): string => {
+    let newString: string
+    if (currentStart == currentEnd) {
+      if (currentStart != 0) {
+        setCursor(currentStart - 1)
+        newString = prev.substring(0, currentStart - 1) + prev.substring(currentStart, prev.length)
+      } else {
+        newString = prev
+      }
+      set(dbInputRef, newString)
+      return newString
+    } else {
+      return insertTextAtCursor(prev, '', currentStart, currentEnd)
+    }
+  }
+
+  const handleKeyDown = (e: React.KeyboardEvent<HTMLTextAreaElement>) => {
+    if (e.ctrlKey || e.altKey || e.metaKey) {
+      return
+    }
+    if (document.activeElement == userInputElement.current) {
+      const value = e.key
+      const startIndex = userInputElement.current!.selectionStart
+      const endIndex = userInputElement.current!.selectionEnd
+      if (isInput(value)) {
+        setInput((prev) => insertTextAtCursor(prev, mapInput(keys, value), startIndex, endIndex))
+      } else if (value == 'Backspace') {
+        setInput((prev) => backspaceAtCursor(prev, startIndex, endIndex))
+      }
+    }
   }
 
   let opponent = ''
@@ -69,6 +116,7 @@ const MultiplayerGame: React.FC<MultiplayerGameProps> = ({
 
   useEffect(() => {
     onValue(ref(database, `rooms/${roomId}/textInput/${opponent}`), (snapshot) => {
+      console.log('test')
       if (snapshot.exists()) {
         setOpponentInput(snapshot.val())
       } else {
@@ -102,7 +150,17 @@ const MultiplayerGame: React.FC<MultiplayerGameProps> = ({
       <hr className={styles.separator}></hr>
       <TextDisplay quote={quote} input={input} />
       <div className={styles.container}>
-        <TextArea input={input} onChange={handleChange} />
+        <textarea
+          className={styles.userInput}
+          ref={userInputElement}
+          value={input}
+          onChange={() => {
+            window.requestAnimationFrame(() => {
+              userInputElement.current!.setSelectionRange(cursor, cursor)
+            })
+          }}
+          onKeyDown={handleKeyDown}
+        ></textarea>
       </div>
       <Keyboard keys={keys}></Keyboard>
 
