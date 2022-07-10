@@ -6,6 +6,9 @@ import styles from './Game.module.css'
 import { useAuth } from 'hooks/useAuth'
 import { remove, DatabaseReference, onValue, ref, set } from 'firebase/database'
 import { database } from 'config/firebaseConfig'
+import { generateKeyboard } from 'utils/keyboard'
+import { defaultGameOptions } from 'components/firebase/RoomFunctions'
+
 interface MultiplayerGameProps {
   roomId: string
   keys: keyboardMap
@@ -102,16 +105,16 @@ const MultiplayerGame: React.FC<MultiplayerGameProps> = ({
     }
   }
 
+  const endGame = () => {
+    setGameEnd(true)
+    remove(ref(database, `rooms/${roomId}`))
+  }
+
   let opponent = ''
   for (const player in players) {
     if (player !== user?.uid) {
       opponent = player
     }
-  }
-
-  const endGame = () => {
-    setGameEnd(true)
-    remove(ref(database, `rooms/${roomId}`))
   }
 
   useEffect(() => {
@@ -122,10 +125,6 @@ const MultiplayerGame: React.FC<MultiplayerGameProps> = ({
         console.log('Opponent input not in db')
       }
     })
-    if (opponentInput == quote) {
-      setGameResult('You lost!')
-      endGame()
-    }
   })
 
   useEffect(() => {
@@ -134,6 +133,13 @@ const MultiplayerGame: React.FC<MultiplayerGameProps> = ({
       endGame()
     }
   }, [input])
+
+  useEffect(() => {
+    if (opponentInput == quote) {
+      setGameResult('You lost!')
+      endGame()
+    }
+  }, [opponentInput])
 
   useEffect(() => {
     if (time == 0) {
