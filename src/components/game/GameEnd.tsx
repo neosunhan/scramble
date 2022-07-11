@@ -23,7 +23,6 @@ const GameEnd: React.FC<GameEndProps> = ({ outcomeMessage }) => {
 
   useEffect(() => {
     getQuote().then((response) => {
-      console.log(response.data.content)
       setQuote(response.data.content)
     })
   }, [])
@@ -32,7 +31,9 @@ const GameEnd: React.FC<GameEndProps> = ({ outcomeMessage }) => {
     const userId: string = user?.uid as string
     set(ref(database, `rooms/${roomId}`), {
       host: userId,
-      players: {},
+      players: {
+        [userId]: user?.displayName,
+      },
       started: false,
       gameOptions: defaultGameOptions,
       quote: quote,
@@ -47,7 +48,7 @@ const GameEnd: React.FC<GameEndProps> = ({ outcomeMessage }) => {
 
   const hostWantRematch = () => {
     createRoom()
-    joinRoom()
+    navigate(`/lobby/${roomId}`)
   }
 
   const guestWantRematch = () => {
@@ -59,7 +60,6 @@ const GameEnd: React.FC<GameEndProps> = ({ outcomeMessage }) => {
 
     onValue(roomRef, (snapshot) => {
       if (snapshot.exists()) {
-        console.log(snapshot)
         setHostRematch(true)
       }
     })
