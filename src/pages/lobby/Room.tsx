@@ -38,7 +38,11 @@ const Room: React.FC = () => {
   useEffect(() => {
     const playersRef = ref(database, `/rooms/${roomId}/players`)
     onValue(playersRef, (snapshot) => {
-      setPlayers(snapshot.val())
+      if (snapshot.exists()) {
+        setPlayers(snapshot.val())
+      } else {
+        setPlayers({})
+      }
     })
   }, [roomId])
 
@@ -60,12 +64,24 @@ const Room: React.FC = () => {
     }
   }, [])
 
-  return players ? (
+  const displayName = (entry: [string, unknown]) => {
+    const userId = entry[0]
+    let userName = entry[1]
+    if (userId === user?.uid) {
+      userName += ' (You)'
+    }
+    if (userId === roomId) {
+      userName += ' (Host)'
+    }
+    return <div key={userId}>{userName as string}</div>
+  }
+
+  return (
     <div className={styles.room}>
       <div className={styles.roomContainer}>
         <div className={styles.roomHeader}>
           <div>Room:</div>
-          <div>{roomId}</div>
+          <div>{Object.keys(players).length !== 0 ? roomId : 'Host has left the room :('}</div>
         </div>
         <div className={styles.roomMenu}>
           <div className={styles.tabList}>
@@ -74,17 +90,12 @@ const Room: React.FC = () => {
           </div>
           <div className={styles.waitingForPlayers}> Waiting for Opponent...</div>
           <div className={styles.playerList}>
-            {Object.entries(players).map((entry) => {
-              const userId = entry[0]
-              let userName = entry[1]
-              if (userId === user?.uid) {
-                userName += ' (You)'
-              }
-              if (userId === roomId) {
-                userName += ' (Host)'
-              }
-              return <div key={userId}>{userName as string}</div>
-            })}
+            {Object.entries(players)
+              .filter((entry) => entry[0] === roomId)
+              .map(displayName)}
+            {Object.entries(players)
+              .filter((entry) => entry[0] !== roomId)
+              .map(displayName)}
           </div>
           <div className={styles.menuButtonContainer}>
             {user?.uid === roomId ? (
@@ -103,8 +114,6 @@ const Room: React.FC = () => {
         </div>
       </div>
     </div>
-  ) : (
-    <div>{`Room ${roomId} is not open`}</div>
   )
 }
 
