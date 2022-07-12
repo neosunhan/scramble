@@ -1,6 +1,6 @@
 import React, { useEffect, useState } from 'react'
 import { Link, useParams, useNavigate } from 'react-router-dom'
-import { remove, ref, onValue, set } from 'firebase/database'
+import { remove, ref, onValue, get, set } from 'firebase/database'
 import { database } from 'config/firebaseConfig'
 import { useAuth } from 'hooks/useAuth'
 
@@ -11,6 +11,10 @@ const Room: React.FC = () => {
   const { user } = useAuth()
   const [players, setPlayers] = useState({})
   const navigate = useNavigate()
+  let quoteTemp = ''
+  get(ref(database, `rooms/${roomId}/quote`)).then((snapshot) => {
+    quoteTemp = snapshot.val()
+  })
 
   const leaveRoom = () => {
     if (user?.uid === roomId) {
@@ -22,13 +26,17 @@ const Room: React.FC = () => {
 
   const startGame = () => {
     let numPlayers = 0
-    const textInput: { [input: string]: string } = {}
+    const nextWord: { [input: string]: string } = {}
+    const quoteLeft: { [input: string]: string } = {}
+
     for (const player in players) {
       numPlayers++
-      textInput[player] = ''
+      nextWord[player] = ''
+      quoteLeft[player] = quoteTemp
     }
     if (numPlayers === 2) {
-      set(ref(database, `rooms/${roomId}/textInput`), textInput)
+      set(ref(database, `rooms/${roomId}/nextWord`), nextWord)
+      set(ref(database, `rooms/${roomId}/quoteLeft`), quoteLeft)
       set(ref(database, `rooms/${roomId}/started`), true)
     } else {
       alert('Number of players is not 2!')

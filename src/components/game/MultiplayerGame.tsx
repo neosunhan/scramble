@@ -47,10 +47,16 @@ const MultiplayerGame: React.FC<MultiplayerGameProps> = ({
   const [input, setInput] = useState('')
   const [opponentInput, setOpponentInput] = useState('')
   const [cursor, setCursor] = useState(0)
-  const dbInputRef = ref(database, `rooms/${roomId}/textInput/${user?.uid}`)
+  const dbInputRef = ref(database, `rooms/${roomId}/nextWord/${user?.uid}`)
+  const dbQuoteLeftRef = ref(database, `rooms/${roomId}/quoteLeft/${user?.uid}`)
   const [gameResult, setGameResult] = useState('Tie!')
   const [gameEnd, setGameEnd] = useState(false)
   const userInputElement = React.useRef<HTMLInputElement>(null)
+
+  const [quoteLeft, setQuoteLeft] = useState(quote)
+  const words = quote.split(' ').map((s) => s + ' ')
+  const [nextWordIndex, setNextWordIndex] = useState(0)
+  const [opponentQuoteLeft, setOpponentQuoteLeft] = useState(quote)
 
   const insertTextAtCursor = (
     prev: string,
@@ -107,7 +113,13 @@ const MultiplayerGame: React.FC<MultiplayerGameProps> = ({
 
   const endGame = () => {
     setGameEnd(true)
-    remove(ref(database, `rooms/${roomId}`))
+    const wordCount = nextWordIndex - 1
+    const opponentWordCount = words.length - opponentQuoteLeft.split(' ').length
+    if (wordCount > opponentWordCount) {
+      setGameResult('You win!')
+    } else if (wordCount < opponentWordCount) {
+      setGameResult('You lose!')
+    }
   }
 
   let opponent = ''
@@ -118,9 +130,17 @@ const MultiplayerGame: React.FC<MultiplayerGameProps> = ({
   }
 
   useEffect(() => {
-    onValue(ref(database, `rooms/${roomId}/textInput/${opponent}`), (snapshot) => {
+    onValue(ref(database, `rooms/${roomId}/nextWord/${opponent}`), (snapshot) => {
       if (snapshot.exists()) {
         setOpponentInput(snapshot.val())
+      } else {
+        console.log('Opponent input not in db')
+      }
+    })
+
+    onValue(ref(database, `rooms/${roomId}/quoteLeft/${opponent}`), (snapshot) => {
+      if (snapshot.exists()) {
+        setOpponentQuoteLeft(snapshot.val())
       } else {
         console.log('Opponent input not in db')
       }
@@ -128,18 +148,39 @@ const MultiplayerGame: React.FC<MultiplayerGameProps> = ({
   })
 
   useEffect(() => {
-    if (input == quote) {
-      setGameResult('You won!')
-      endGame()
+    if (input === words[nextWordIndex]) {
+      const nextSpaceIndex = quoteLeft.indexOf(' ')
+      if (nextSpaceIndex === -1) {
+        setInput('')
+        setQuoteLeft('')
+        set(dbInputRef, '')
+        set(dbQuoteLeftRef, '')
+        endGame()
+      } else {
+        const tempQuote = quoteLeft.slice(nextSpaceIndex + 1)
+        setInput('')
+        setQuoteLeft(tempQuote)
+        set(dbInputRef, '')
+        set(dbQuoteLeftRef, tempQuote)
+      }
     }
   }, [input])
 
   useEffect(() => {
-    if (opponentInput == quote) {
-      setGameResult('You lost!')
+    setQuoteLeft(quote)
+  }, [quote])
+
+  useEffect(() => {
+    if (quoteLeft !== quote) {
+      setNextWordIndex(nextWordIndex + 1)
+    }
+  }, [quoteLeft])
+
+  useEffect(() => {
+    if (opponentQuoteLeft == '') {
       endGame()
     }
-  }, [opponentInput])
+  }, [opponentQuoteLeft])
 
   useEffect(() => {
     if (time == 0) {
@@ -156,9 +197,9 @@ const MultiplayerGame: React.FC<MultiplayerGameProps> = ({
       <Timer time={gameEnd ? 0 : time} />
       <div className={styles.textContainerMP}>
         <div className={styles.opponentDisplay}>{`${players[opponent]} is typing...`}</div>
-        <TextDisplay quote={quote} input={opponentInput} />
+        <TextDisplay quote={opponentQuoteLeft} input={opponentInput} />
         <hr className={styles.separator}></hr>
-        <TextDisplay quote={quote} input={input} />
+        <TextDisplay quote={quoteLeft} input={input} />
       </div>
       <div className={styles.inputContainer}>
         <input
