@@ -147,6 +147,10 @@ const MultiplayerGame: React.FC<MultiplayerGameProps> = ({
     }
   }, [time])
 
+  useEffect(() => {
+    set(ref(database, `rooms/${roomId}/players/${user?.uid}`), user?.displayName)
+  }, [])
+
   return (
     <div className={styles.gameWindow}>
       <Timer time={gameEnd ? 0 : time} />

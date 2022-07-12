@@ -52,6 +52,14 @@ const Room: React.FC = () => {
     })
   })
 
+  useEffect(() => {
+    set(ref(database, `rooms/${roomId}/players/${user?.uid}`), user?.displayName)
+    window.addEventListener('beforeunload', leaveRoom)
+    return () => {
+      window.removeEventListener('beforeunload', leaveRoom)
+    }
+  }, [])
+
   return players ? (
     <div className={styles.room}>
       <div className={styles.roomContainer}>

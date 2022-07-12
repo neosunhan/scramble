@@ -37,7 +37,6 @@ const Lobby: React.FC = () => {
 
   const joinRoom = (e: React.FormEvent<HTMLFormElement>) => {
     e.preventDefault()
-    set(ref(database, `rooms/${roomToJoin}/players/${user?.uid}`), user?.displayName)
     navigate(roomToJoin)
   }
 
