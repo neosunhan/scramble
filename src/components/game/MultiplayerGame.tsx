@@ -50,7 +50,7 @@ const MultiplayerGame: React.FC<MultiplayerGameProps> = ({
   const dbInputRef = ref(database, `rooms/${roomId}/textInput/${user?.uid}`)
   const [gameResult, setGameResult] = useState('Tie!')
   const [gameEnd, setGameEnd] = useState(false)
-  const userInputElement = React.useRef<HTMLTextAreaElement>(null)
+  const userInputElement = React.useRef<HTMLInputElement>(null)
 
   const insertTextAtCursor = (
     prev: string,
@@ -89,7 +89,7 @@ const MultiplayerGame: React.FC<MultiplayerGameProps> = ({
     }
   }
 
-  const handleKeyDown = (e: React.KeyboardEvent<HTMLTextAreaElement>) => {
+  const handleKeyDown = (e: React.KeyboardEvent<HTMLInputElement>) => {
     if (e.ctrlKey || e.altKey || e.metaKey) {
       return
     }
@@ -98,9 +98,9 @@ const MultiplayerGame: React.FC<MultiplayerGameProps> = ({
       const startIndex = userInputElement.current!.selectionStart
       const endIndex = userInputElement.current!.selectionEnd
       if (isInput(value)) {
-        setInput((prev) => insertTextAtCursor(prev, mapInput(keys, value), startIndex, endIndex))
+        setInput((prev) => insertTextAtCursor(prev, mapInput(keys, value), startIndex!, endIndex!))
       } else if (value == 'Backspace') {
-        setInput((prev) => backspaceAtCursor(prev, startIndex, endIndex))
+        setInput((prev) => backspaceAtCursor(prev, startIndex!, endIndex!))
       }
     }
   }
@@ -154,22 +154,27 @@ const MultiplayerGame: React.FC<MultiplayerGameProps> = ({
   return (
     <div className={styles.gameWindow}>
       <Timer time={gameEnd ? 0 : time} />
-      <div className={styles.opponentDisplay}>{`${players[opponent]} is typing...`}</div>
-      <TextDisplay quote={quote} input={opponentInput} />
-      <hr className={styles.separator}></hr>
-      <TextDisplay quote={quote} input={input} />
-      <div className={styles.container}>
-        <textarea
+      <div className={styles.textContainerMP}>
+        <div className={styles.opponentDisplay}>{`${players[opponent]} is typing...`}</div>
+        <TextDisplay quote={quote} input={opponentInput} />
+        <hr className={styles.separator}></hr>
+        <TextDisplay quote={quote} input={input} />
+      </div>
+      <div className={styles.inputContainer}>
+        <input
+          type='text'
+          autoFocus
           className={styles.userInput}
           ref={userInputElement}
           value={input}
+          placeholder='Start typing!'
           onChange={() => {
             window.requestAnimationFrame(() => {
               userInputElement.current!.setSelectionRange(cursor, cursor)
             })
           }}
           onKeyDown={handleKeyDown}
-        ></textarea>
+        ></input>
       </div>
       <Keyboard keys={keys}></Keyboard>
 
