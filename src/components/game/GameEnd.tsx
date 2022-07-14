@@ -21,7 +21,13 @@ const GameEnd: React.FC<GameEndProps> = ({ outcomeMessage, gameStats }) => {
   const [hostRematch, setHostRematch] = useState(false)
   const [guestRematch, setGuestRematch] = useState(false)
   const navigate = useNavigate()
-  console.log(gameStats)
+
+  const gameTime: number = gameStats['gameTime' as keyof typeof gameStats]
+  const words: number = gameStats[user?.uid as keyof typeof gameStats]['wordCount']
+  const opponentWords: number = gameStats['opponent' as keyof typeof gameStats]['wordCount']
+  const wpm = ((words * 60.0) / gameTime).toFixed(2)
+  const opponentWpm = ((opponentWords * 60.0) / gameTime).toFixed(2)
+
   useEffect(() => {
     getQuote().then((response) => {
       setQuote(response.data.content)
@@ -83,6 +89,17 @@ const GameEnd: React.FC<GameEndProps> = ({ outcomeMessage, gameStats }) => {
       <div className={styles.gameEndWindow}>
         <div className={styles.gameEndHeaderBar}>
           <div className={styles.outcomeMessage}>{outcomeMessage}</div>
+        </div>
+        <div className={styles.statsTitle}>Words-per-minute (WPM)</div>
+        <div className={styles.gameStats}>
+          <div className={styles.wpmContainer}>
+            <div className={styles.wpmTitle}>You:</div>
+            <div className={styles.wpm}>{wpm} WPM</div>
+          </div>
+          <div className={styles.wpmContainer}>
+            <div className={styles.wpmTitle}>Them:</div>
+            <div className={styles.wpm}>{opponentWpm} WPM</div>
+          </div>
         </div>
         <div className={styles.buttonList}>
           {user?.uid == roomId ? (

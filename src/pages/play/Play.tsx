@@ -51,8 +51,6 @@ const Play: React.FC = () => {
 
   useEffect(() => {
     if (gameDuration >= 0 && startTime >= 0) {
-      console.log('Gameduration: ' + gameDuration)
-      console.log('startTime: ' + startTime)
       setTimer(
         setInterval(() => {
           const difference = Math.floor((Date.now() - startTime) / 1000)

@@ -143,7 +143,7 @@ const MultiplayerGame: React.FC<MultiplayerGameProps> = ({
     }
   }
 
-  let opponent = 'test'
+  let opponent = '_@__@_'
   for (const player in players) {
     if (player !== user?.uid) {
       opponent = player
