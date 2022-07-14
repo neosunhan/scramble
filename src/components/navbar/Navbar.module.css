@@ -23,5 +23,12 @@
   color: inherit;
   font-size: 2.5rem;
   border-right: 0.15em solid orange;
+}
+
+.dynamic {
   cursor: pointer;
+}
+
+.displayName {
+  font-size: 1.5rem;
 }
