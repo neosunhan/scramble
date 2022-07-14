@@ -18,9 +18,10 @@ const GameEnd: React.FC<GameEndProps> = ({ outcomeMessage, gameStats }) => {
   const { user } = useAuth()
   const { roomId } = useParams()
   const [quote, setQuote] = useState('Cannot get quote')
-  const [hostRematch, setHostRematch] = useState(false)
+  const [hostRematch, setHostRematch] = useState(0)
   const [guestRematch, setGuestRematch] = useState(false)
   const navigate = useNavigate()
+  const roomRef = ref(database, `/rooms/${roomId}`)
 
   const gameTime: number = gameStats['gameTime' as keyof typeof gameStats]
   const words: number = gameStats[user?.uid as keyof typeof gameStats]['wordCount']
@@ -34,13 +35,9 @@ const GameEnd: React.FC<GameEndProps> = ({ outcomeMessage, gameStats }) => {
     })
   }, [])
 
-  const createRoom = () => {
-    const userId: string = user?.uid as string
-    set(ref(database, `rooms/${roomId}`), {
-      host: userId,
-      players: {
-        [userId]: user?.displayName,
-      },
+  const resetRoom = () => {
+    set(roomRef, {
+      players: {},
       started: false,
       gameOptions: defaultGameOptions,
       quote: quote,
@@ -53,9 +50,10 @@ const GameEnd: React.FC<GameEndProps> = ({ outcomeMessage, gameStats }) => {
     navigate(`/lobby/${roomId}`)
   }
 
-  const hostWantRematch = () => {
-    createRoom()
-    navigate(`/lobby/${roomId}`)
+  const deleteRoom = () => {
+    set(roomRef, {
+      deleted: true,
+    })
   }
 
   const guestWantRematch = () => {
@@ -63,17 +61,23 @@ const GameEnd: React.FC<GameEndProps> = ({ outcomeMessage, gameStats }) => {
   }
 
   useEffect(() => {
-    const roomRef = ref(database, `/rooms/${roomId}`)
+    resetRoom()
 
     onValue(roomRef, (snapshot) => {
       if (snapshot.exists()) {
-        setHostRematch(true)
+        const roomObj = snapshot.val()
+        if (roomObj['players']) {
+          setHostRematch(1)
+        } else if (roomObj['deleted']) {
+          setHostRematch(-1)
+          remove(roomRef)
+        }
       }
     })
-  })
+  }, [])
 
   useEffect(() => {
-    if (user?.uid != roomId && guestRematch) {
+    if (user?.uid != roomId && guestRematch && hostRematch > 0) {
       joinRoom()
     }
   }, [hostRematch])
@@ -103,11 +107,15 @@ const GameEnd: React.FC<GameEndProps> = ({ outcomeMessage, gameStats }) => {
         </div>
         <div className={styles.buttonList}>
           {user?.uid == roomId ? (
-            <button className={styles.rematchButton} onClick={hostWantRematch}>
+            <button className={styles.rematchButton} onClick={joinRoom}>
               Rematch
             </button>
           ) : guestRematch ? (
-            <div className={styles.waitingForHost}>Waiting for host...</div>
+            hostRematch < 0 ? (
+              <div className={styles.waitingForHost}>Host left the game :(</div>
+            ) : (
+              <div className={styles.waitingForHost}>Waiting for host...</div>
+            )
           ) : (
             <button className={styles.rematchButton} onClick={guestWantRematch}>
               Rematch
@@ -115,7 +123,9 @@ const GameEnd: React.FC<GameEndProps> = ({ outcomeMessage, gameStats }) => {
           )}
           <div className={styles.lobbyButtonContainer}>
             <Link to='/lobby'>
-              <button className={styles.lobbyButton}>Return to lobby</button>
+              <button className={styles.lobbyButton} onClick={deleteRoom}>
+                Return to lobby
+              </button>
             </Link>
           </div>
         </div>
