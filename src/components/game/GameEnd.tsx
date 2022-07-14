@@ -11,16 +11,17 @@ import styles from './GameEnd.module.css'
 
 interface GameEndProps {
   outcomeMessage: string
+  gameStats: object
 }
 
-const GameEnd: React.FC<GameEndProps> = ({ outcomeMessage }) => {
+const GameEnd: React.FC<GameEndProps> = ({ outcomeMessage, gameStats }) => {
   const { user } = useAuth()
   const { roomId } = useParams()
   const [quote, setQuote] = useState('Cannot get quote')
   const [hostRematch, setHostRematch] = useState(false)
   const [guestRematch, setGuestRematch] = useState(false)
   const navigate = useNavigate()
-
+  console.log(gameStats)
   useEffect(() => {
     getQuote().then((response) => {
       setQuote(response.data.content)

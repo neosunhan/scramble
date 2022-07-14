@@ -4,7 +4,7 @@ import { keyboardMap } from 'utils/keyboard'
 import { GameEnd } from './GameEnd'
 import styles from './Game.module.css'
 import { useAuth } from 'hooks/useAuth'
-import { remove, DatabaseReference, onValue, ref, set } from 'firebase/database'
+import { remove, DatabaseReference, onValue, ref, set, get } from 'firebase/database'
 import { database } from 'config/firebaseConfig'
 import { generateKeyboard } from 'utils/keyboard'
 import { defaultGameOptions } from 'components/firebase/RoomFunctions'
@@ -56,7 +56,10 @@ const MultiplayerGame: React.FC<MultiplayerGameProps> = ({
   const [quoteLeft, setQuoteLeft] = useState(quote)
   const words = quote.split(' ').map((s) => s + ' ')
   const [nextWordIndex, setNextWordIndex] = useState(0)
-  const [opponentQuoteLeft, setOpponentQuoteLeft] = useState(quote)
+  const [opponentQuoteLeft, setOpponentQuoteLeft] = useState<string>('Initial')
+
+  const [startTime, setStartTime] = useState(-1)
+  const [gameStats, setGameStats] = useState({})
 
   const insertTextAtCursor = (
     prev: string,
@@ -112,17 +115,35 @@ const MultiplayerGame: React.FC<MultiplayerGameProps> = ({
   }
 
   const endGame = () => {
-    setGameEnd(true)
-    const wordCount = nextWordIndex - 1
-    const opponentWordCount = words.length - opponentQuoteLeft.split(' ').length
-    if (wordCount > opponentWordCount) {
-      setGameResult('You win!')
-    } else if (wordCount < opponentWordCount) {
-      setGameResult('You lose!')
+    if (!gameEnd) {
+      const wordsLeft = !quoteLeft ? 0 : quoteLeft.split(' ').length
+      const opponentWordsLeft = !opponentQuoteLeft ? 0 : opponentQuoteLeft.split(' ').length
+      const wordCount = words.length - wordsLeft
+      const opponentWordCount = words.length - opponentWordsLeft
+      const gameTime = startTime - time
+
+      if (wordCount > opponentWordCount) {
+        setGameResult('You win!')
+      } else if (wordCount < opponentWordCount) {
+        setGameResult('You lose!')
+      }
+
+      const stats = {
+        [user?.uid as string]: {
+          wordCount: wordCount,
+        },
+        opponent: {
+          wordCount: opponentWordCount,
+        },
+        gameTime: gameTime,
+      }
+
+      setGameStats(stats)
+      setGameEnd(true)
     }
   }
 
-  let opponent = ''
+  let opponent = 'test'
   for (const player in players) {
     if (player !== user?.uid) {
       opponent = player
@@ -134,7 +155,7 @@ const MultiplayerGame: React.FC<MultiplayerGameProps> = ({
       if (snapshot.exists()) {
         setOpponentInput(snapshot.val())
       } else {
-        console.log('Opponent input not in db')
+        console.log('Opponent nextWord not in db')
       }
     })
 
@@ -142,7 +163,7 @@ const MultiplayerGame: React.FC<MultiplayerGameProps> = ({
       if (snapshot.exists()) {
         setOpponentQuoteLeft(snapshot.val())
       } else {
-        console.log('Opponent input not in db')
+        console.log('Opponent quoteLeft not in db')
       }
     })
   })
@@ -155,7 +176,6 @@ const MultiplayerGame: React.FC<MultiplayerGameProps> = ({
         setQuoteLeft('')
         set(dbInputRef, '')
         set(dbQuoteLeftRef, '')
-        endGame()
       } else {
         const tempQuote = quoteLeft.slice(nextSpaceIndex + 1)
         setInput('')
@@ -167,22 +187,24 @@ const MultiplayerGame: React.FC<MultiplayerGameProps> = ({
   }, [input])
 
   useEffect(() => {
-    setQuoteLeft(quote)
-  }, [quote])
-
-  useEffect(() => {
     if (quoteLeft !== quote) {
       setNextWordIndex(nextWordIndex + 1)
+      if (!quoteLeft) {
+        endGame()
+      }
     }
   }, [quoteLeft])
 
   useEffect(() => {
-    if (opponentQuoteLeft == '') {
+    if (!opponentQuoteLeft) {
       endGame()
     }
   }, [opponentQuoteLeft])
 
   useEffect(() => {
+    if (startTime < 0) {
+      setStartTime(time)
+    }
     if (time == 0) {
       endGame()
     }
@@ -192,9 +214,14 @@ const MultiplayerGame: React.FC<MultiplayerGameProps> = ({
     set(ref(database, `rooms/${roomId}/players/${user?.uid}`), user?.displayName)
   }, [])
 
+  useEffect(() => {
+    setQuoteLeft(quote)
+    setOpponentQuoteLeft(quote)
+  }, [quote])
+
   return (
     <div className={styles.gameWindow}>
-      <Timer time={gameEnd ? 0 : time} />
+      <Timer time={time} />
       <div className={styles.textContainerMP}>
         <div className={styles.opponentDisplay}>{`${players[opponent]} is typing...`}</div>
         <TextDisplay quote={opponentQuoteLeft} input={opponentInput} />
@@ -219,7 +246,7 @@ const MultiplayerGame: React.FC<MultiplayerGameProps> = ({
       </div>
       <Keyboard keys={keys}></Keyboard>
 
-      {gameEnd && <GameEnd outcomeMessage={gameResult} />}
+      {gameEnd && <GameEnd outcomeMessage={gameResult} gameStats={gameStats} />}
     </div>
   )
 }

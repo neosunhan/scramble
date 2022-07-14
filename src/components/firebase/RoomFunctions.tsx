@@ -39,5 +39,5 @@ export const defaultGameOptions: GameOptions = {
   noShuffle: false,
   withinHand: true,
   withinRow: true,
-  time: 120,
+  time: 5,
 }
