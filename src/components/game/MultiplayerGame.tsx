@@ -4,7 +4,7 @@ import { keyboardMap } from 'utils/keyboard'
 import { GameEnd } from './GameEnd'
 import styles from './Game.module.css'
 import { useAuth } from 'hooks/useAuth'
-import { remove, DatabaseReference, onValue, ref, set } from 'firebase/database'
+import { remove, DatabaseReference, onValue, ref, set, get } from 'firebase/database'
 import { database } from 'config/firebaseConfig'
 import { generateKeyboard } from 'utils/keyboard'
 import { defaultGameOptions } from 'components/firebase/RoomFunctions'
@@ -47,10 +47,19 @@ const MultiplayerGame: React.FC<MultiplayerGameProps> = ({
   const [input, setInput] = useState('')
   const [opponentInput, setOpponentInput] = useState('')
   const [cursor, setCursor] = useState(0)
-  const dbInputRef = ref(database, `rooms/${roomId}/textInput/${user?.uid}`)
+  const dbInputRef = ref(database, `rooms/${roomId}/nextWord/${user?.uid}`)
+  const dbQuoteLeftRef = ref(database, `rooms/${roomId}/quoteLeft/${user?.uid}`)
   const [gameResult, setGameResult] = useState('Tie!')
   const [gameEnd, setGameEnd] = useState(false)
-  const userInputElement = React.useRef<HTMLTextAreaElement>(null)
+  const userInputElement = React.useRef<HTMLInputElement>(null)
+
+  const [quoteLeft, setQuoteLeft] = useState(quote)
+  const words = quote.split(' ').map((s) => s + ' ')
+  const [nextWordIndex, setNextWordIndex] = useState(0)
+  const [opponentQuoteLeft, setOpponentQuoteLeft] = useState<string>('Initial')
+
+  const [startTime, setStartTime] = useState(-1)
+  const [gameStats, setGameStats] = useState({})
 
   const insertTextAtCursor = (
     prev: string,
@@ -89,7 +98,7 @@ const MultiplayerGame: React.FC<MultiplayerGameProps> = ({
     }
   }
 
-  const handleKeyDown = (e: React.KeyboardEvent<HTMLTextAreaElement>) => {
+  const handleKeyDown = (e: React.KeyboardEvent<HTMLInputElement>) => {
     if (e.ctrlKey || e.altKey || e.metaKey) {
       return
     }
@@ -98,19 +107,43 @@ const MultiplayerGame: React.FC<MultiplayerGameProps> = ({
       const startIndex = userInputElement.current!.selectionStart
       const endIndex = userInputElement.current!.selectionEnd
       if (isInput(value)) {
-        setInput((prev) => insertTextAtCursor(prev, mapInput(keys, value), startIndex, endIndex))
+        setInput((prev) => insertTextAtCursor(prev, mapInput(keys, value), startIndex!, endIndex!))
       } else if (value == 'Backspace') {
-        setInput((prev) => backspaceAtCursor(prev, startIndex, endIndex))
+        setInput((prev) => backspaceAtCursor(prev, startIndex!, endIndex!))
       }
     }
   }
 
   const endGame = () => {
-    setGameEnd(true)
-    remove(ref(database, `rooms/${roomId}`))
+    if (!gameEnd) {
+      const wordsLeft = !quoteLeft ? 0 : quoteLeft.split(' ').length
+      const opponentWordsLeft = !opponentQuoteLeft ? 0 : opponentQuoteLeft.split(' ').length
+      const wordCount = words.length - wordsLeft
+      const opponentWordCount = words.length - opponentWordsLeft
+      const gameTime = startTime - time
+
+      if (wordCount > opponentWordCount) {
+        setGameResult('You win!')
+      } else if (wordCount < opponentWordCount) {
+        setGameResult('You lose!')
+      }
+
+      const stats = {
+        [user?.uid as string]: {
+          wordCount: wordCount,
+        },
+        opponent: {
+          wordCount: opponentWordCount,
+        },
+        gameTime: gameTime,
+      }
+
+      setGameStats(stats)
+      setGameEnd(true)
+    }
   }
 
-  let opponent = ''
+  let opponent = '_@__@_'
   for (const player in players) {
     if (player !== user?.uid) {
       opponent = player
@@ -118,30 +151,60 @@ const MultiplayerGame: React.FC<MultiplayerGameProps> = ({
   }
 
   useEffect(() => {
-    onValue(ref(database, `rooms/${roomId}/textInput/${opponent}`), (snapshot) => {
+    onValue(ref(database, `rooms/${roomId}/nextWord/${opponent}`), (snapshot) => {
       if (snapshot.exists()) {
         setOpponentInput(snapshot.val())
       } else {
-        console.log('Opponent input not in db')
+        console.log('Opponent nextWord not in db')
+      }
+    })
+
+    onValue(ref(database, `rooms/${roomId}/quoteLeft/${opponent}`), (snapshot) => {
+      if (snapshot.exists()) {
+        setOpponentQuoteLeft(snapshot.val())
+      } else {
+        console.log('Opponent quoteLeft not in db')
       }
     })
   })
 
   useEffect(() => {
-    if (input == quote) {
-      setGameResult('You won!')
-      endGame()
+    if (input === words[nextWordIndex]) {
+      const nextSpaceIndex = quoteLeft.indexOf(' ')
+      if (nextSpaceIndex === -1) {
+        setInput('')
+        setQuoteLeft('')
+        set(dbInputRef, '')
+        set(dbQuoteLeftRef, '')
+      } else {
+        const tempQuote = quoteLeft.slice(nextSpaceIndex + 1)
+        setInput('')
+        setQuoteLeft(tempQuote)
+        set(dbInputRef, '')
+        set(dbQuoteLeftRef, tempQuote)
+      }
     }
   }, [input])
 
   useEffect(() => {
-    if (opponentInput == quote) {
-      setGameResult('You lost!')
-      endGame()
+    if (quoteLeft !== quote) {
+      setNextWordIndex(nextWordIndex + 1)
+      if (!quoteLeft) {
+        endGame()
+      }
     }
-  }, [opponentInput])
+  }, [quoteLeft])
 
   useEffect(() => {
+    if (!opponentQuoteLeft) {
+      endGame()
+    }
+  }, [opponentQuoteLeft])
+
+  useEffect(() => {
+    if (startTime < 0) {
+      setStartTime(time)
+    }
     if (time == 0) {
       endGame()
     }
@@ -151,29 +214,39 @@ const MultiplayerGame: React.FC<MultiplayerGameProps> = ({
     set(ref(database, `rooms/${roomId}/players/${user?.uid}`), user?.displayName)
   }, [])
 
+  useEffect(() => {
+    setQuoteLeft(quote)
+    setOpponentQuoteLeft(quote)
+  }, [quote])
+
   return (
     <div className={styles.gameWindow}>
-      <Timer time={gameEnd ? 0 : time} />
-      <div className={styles.opponentDisplay}>{`${players[opponent]} is typing...`}</div>
-      <TextDisplay quote={quote} input={opponentInput} />
-      <hr className={styles.separator}></hr>
-      <TextDisplay quote={quote} input={input} />
-      <div className={styles.container}>
-        <textarea
+      <Timer time={time} />
+      <div className={styles.textContainerMP}>
+        <div className={styles.opponentDisplay}>{`${players[opponent]} is typing...`}</div>
+        <TextDisplay quote={opponentQuoteLeft} input={opponentInput} />
+        <hr className={styles.separator}></hr>
+        <TextDisplay quote={quoteLeft} input={input} />
+      </div>
+      <div className={styles.inputContainer}>
+        <input
+          type='text'
+          autoFocus
           className={styles.userInput}
           ref={userInputElement}
           value={input}
+          placeholder='Start typing!'
           onChange={() => {
             window.requestAnimationFrame(() => {
               userInputElement.current!.setSelectionRange(cursor, cursor)
             })
           }}
           onKeyDown={handleKeyDown}
-        ></textarea>
+        ></input>
       </div>
       <Keyboard keys={keys}></Keyboard>
 
-      {gameEnd && <GameEnd outcomeMessage={gameResult} />}
+      {gameEnd && <GameEnd outcomeMessage={gameResult} gameStats={gameStats} />}
     </div>
   )
 }

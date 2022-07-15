@@ -17,12 +17,15 @@ const Play: React.FC = () => {
   const [quote, setQuote] = useState('Unable to fetch quote from database')
   const [keys, setKeys] = useState<keyboardMap>(unshuffledMap)
   const [players, setPlayers] = useState({})
+  const [gameDuration, setGameDuration] = useState(-1)
+  const [time, setTime] = useState(-1)
+  const [startTime, setStartTime] = useState(-1)
+  const [timer, setTimer] = useState(
+    setInterval(() => {
+      return
+    }, 1000),
+  )
 
-  const [time, setTime] = useState(300)
-
-  const [startTime, setStartTime] = useState(Date.now())
-
-  let gameDuration = time
   useEffect(() => {
     get(ref(database, `rooms/${roomId}`))
       .then((snapshot) => {
@@ -30,8 +33,7 @@ const Play: React.FC = () => {
           const roomObj = snapshot.val()
           setQuote(roomObj['quote'])
           setKeys(roomObj['keyMap'])
-          setTime(roomObj['gameOptions']['time'])
-          gameDuration = roomObj['gameOptions']['time']
+          setGameDuration(roomObj['gameOptions']['time'])
           setPlayers(roomObj['players'])
         } else {
         }
@@ -42,20 +44,25 @@ const Play: React.FC = () => {
   }, [])
 
   useEffect(() => {
-    const interval = setInterval(() => {
-      const difference = Math.floor((Date.now() - startTime) / 1000)
-      setTime(gameDuration - difference)
-    }, 100)
-    return () => clearInterval(interval)
+    if (gameDuration >= 0) {
+      setStartTime(Date.now())
+    }
+  }, [gameDuration])
+
+  useEffect(() => {
+    if (gameDuration >= 0 && startTime >= 0) {
+      setTimer(
+        setInterval(() => {
+          const difference = Math.floor((Date.now() - startTime) / 1000)
+          setTime(gameDuration - difference)
+        }, 100),
+      )
+    }
   }, [startTime])
 
   useEffect(() => {
-    setStartTime(Date.now())
-  }, [])
-
-  useEffect(() => {
     if (time === 0) {
-      setStartTime(Date.now())
+      clearInterval(timer)
     }
   }, [time])
 
