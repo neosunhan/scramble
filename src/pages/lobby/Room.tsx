@@ -3,6 +3,7 @@ import { Link, useParams, useNavigate } from 'react-router-dom'
 import { remove, ref, onValue, get, set } from 'firebase/database'
 import { database } from 'config/firebaseConfig'
 import { useAuth } from 'hooks/useAuth'
+import { getQuote } from 'api/quotes'
 
 import styles from './Room.module.css'
 import { Checkbox } from 'components'
@@ -14,6 +15,7 @@ import { generateKeyboard } from 'utils/keyboard'
 const Room: React.FC = () => {
   const { roomId } = useParams()
   const { user } = useAuth()
+  const [quote, setQuote] = useState('Cannot get quote')
   const [players, setPlayers] = useState({})
   const [lobby, setLobby] = useState(true)
   const navigate = useNavigate()
@@ -24,10 +26,23 @@ const Room: React.FC = () => {
   const [savedSettings, setSavedSettings] = useState(defaultGameOptions)
   const [saved, setSaved] = useState(true)
 
-  let quoteTemp = ''
-  get(ref(database, `rooms/${roomId}/quote`)).then((snapshot) => {
-    quoteTemp = snapshot.val()
-  })
+  useEffect(() => {
+    if (user?.uid === roomId) {
+      getQuote().then((response) => {
+        setQuote(response.data.content)
+      })
+    } else {
+      get(ref(database, `rooms/${roomId}/quote`)).then((snapshot) => {
+        setQuote(snapshot.val())
+      })
+    }
+  }, [])
+
+  useEffect(() => {
+    if (user?.uid === roomId) {
+      set(ref(database, `rooms/${roomId}/quote`), quote)
+    }
+  }, [quote])
 
   const leaveRoom = () => {
     if (user?.uid === roomId) {
@@ -45,7 +60,7 @@ const Room: React.FC = () => {
     for (const player in players) {
       numPlayers++
       nextWord[player] = ''
-      quoteLeft[player] = quoteTemp
+      quoteLeft[player] = quote
     }
     if (numPlayers === 2) {
       set(ref(database, `rooms/${roomId}/nextWord`), nextWord)
@@ -79,7 +94,6 @@ const Room: React.FC = () => {
 
   useEffect(() => {
     if (settingsNotEqual()) {
-      console.log('Not same')
       setSaved(false)
     } else {
       setSaved(true)

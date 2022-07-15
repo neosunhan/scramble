@@ -88,6 +88,10 @@ const GameEnd: React.FC<GameEndProps> = ({ outcomeMessage, gameStats }) => {
     }
   }, [guestRematch])
 
+  useEffect(() => {
+    set(ref(database, `rooms/${roomId}/quote`), quote)
+  }, [quote])
+
   return (
     <div className={styles.modalContainer + ' ' + styles.showModal} id='play-menu'>
       <div className={styles.gameEndWindow}>
