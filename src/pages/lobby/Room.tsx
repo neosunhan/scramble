@@ -55,7 +55,6 @@ const Room: React.FC = () => {
   useEffect(() => {
     if (user?.uid === roomId) {
       if (quoteIndex > 0) {
-        //set(ref(database, `rooms/${roomId}/quote`), quote)
         setQuoteList({ ...quoteList, [quoteIndex]: quote })
         if (Object.keys(quoteList).length === 7) {
           set(ref(database, `/rooms/${roomId}/quoteList`), quoteList)

@@ -1,0 +1,93 @@
+.modalContainer {
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    position: fixed;
+    left: 0;
+    top: 0;
+    width: 100%;
+    height: 100%;
+    overflow: auto;
+    background-color: rgba(0, 0, 0, 0.5);
+    opacity: 0;
+    pointer-events: none;
+    transition: opacity 0.3s ease;
+  }
+  
+  .modalContainer.showModal {
+    opacity: 1;
+    pointer-events: auto;
+  }
+  
+  .roundStartWindow {
+    position: relative;
+    display: flex;
+    flex-direction: column;
+    height: 500px;
+    width: 400px;
+    border: 1rem solid rgb(239, 241, 243);
+    border-radius: 10px;
+    background-color: white;
+  }
+
+  .roundStartHeaderBar {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    padding-bottom: 0.3em;
+    background-color: rgb(239, 241, 243);
+  }
+
+  .currentRound {
+    font-size: 32px;
+    font-weight: bold;
+    padding: 5px;
+  }
+
+  .scoreBoard {
+      font-size: 40px;
+      padding: 5px; 
+  }
+
+  .startingMessage {
+    margin-top: 40px;
+    text-align: center;
+    font-size: 25px;
+  }
+  
+  .countdownTime {
+      font-size: 35px;
+      text-align: center;
+      margin-top: 20px;
+      color: red;
+  }
+
+  .gameStats {
+    flex: 1;
+    display: flex;
+    flex-direction: column;
+    justify-content: space-around;
+    align-items: center;
+    padding: 20px;
+  }
+
+  .statsTitle {
+    text-align: center;
+    font-size: 21px;
+  }
+
+  .wpmContainer {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 5px;
+  }
+
+  .wpmTitle {
+    font-size: 20px;
+    font-weight: bold;
+  }
+
+  .wpm {
+    font-size: 25px;
+  }

@@ -6,6 +6,7 @@ import { useParams } from 'react-router-dom'
 import { useAuth } from 'hooks/useAuth'
 import { Keyboard, Timer, TextArea, TextDisplay } from 'components'
 import { GameEnd } from 'components/game/GameEnd'
+import { RoundStarting } from 'components/game/RoundStarting'
 
 import styles from 'components/game/Game.module.css'
 
@@ -61,7 +62,6 @@ const Play: React.FC = () => {
   const [gameEnd, setGameEnd] = useState(false)
   const userInputElement = React.useRef<HTMLInputElement>(null)
 
-  const [quote, setQuote] = useState('Fetching quote')
   const [quoteLeft, setQuoteLeft] = useState('@')
   const [words, setWords] = useState(['words'])
   //const words = quote.split(' ').map((s) => s + ' ')
@@ -69,6 +69,14 @@ const Play: React.FC = () => {
   const [opponentQuoteLeft, setOpponentQuoteLeft] = useState<string>('Initial')
 
   const [gameStats, setGameStats] = useState({})
+
+  const [roundStart, setRoundStart] = useState(false)
+  const [countdown, setCountdown] = useState(
+    setInterval(() => {
+      return
+    }, 1000),
+  )
+  const [countdownTime, setCountdownTime] = useState(5)
 
   const insertTextAtCursor = (
     prev: string,
@@ -153,6 +161,14 @@ const Play: React.FC = () => {
   }
 
   useEffect(() => {
+    const countdownStart = Date.now()
+    setCountdown(
+      setInterval(() => {
+        const difference = Math.floor((Date.now() - countdownStart) / 1000)
+        setCountdownTime(5 - difference)
+      }, 100),
+    )
+
     get(ref(database, `rooms/${roomId}`))
       .then((snapshot) => {
         if (snapshot.exists()) {
@@ -171,10 +187,17 @@ const Play: React.FC = () => {
   }, [])
 
   useEffect(() => {
-    if (gameDuration >= 0) {
+    if (countdownTime === 0) {
+      setRoundStart(true)
+    }
+  }, [countdownTime])
+
+  useEffect(() => {
+    setTime(gameDuration)
+    if (gameDuration >= 0 && roundStart) {
       setStartTime(Date.now())
     }
-  }, [gameDuration])
+  }, [gameDuration, roundStart])
 
   useEffect(() => {
     if (gameDuration >= 0 && startTime >= 0) {
@@ -220,7 +243,6 @@ const Play: React.FC = () => {
   useEffect(() => {
     if (quoteList && currentRound > 0) {
       const currentQuote: string = quoteList[currentRound as keyof typeof quoteList]
-      setQuote(currentQuote)
       setQuoteLeft(currentQuote)
       setWords(currentQuote.split(' ').map((s) => s + ' '))
     }
@@ -293,6 +315,9 @@ const Play: React.FC = () => {
       </div>
       <Keyboard keys={keys}></Keyboard>
 
+      {!roundStart && (
+        <RoundStarting round={currentRound} countdownTime={countdownTime} gameStats={gameStats} />
+      )}
       {gameEnd && <GameEnd outcomeMessage={gameResult} gameStats={gameStats} />}
     </div>
   )
