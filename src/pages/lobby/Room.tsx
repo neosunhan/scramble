@@ -15,6 +15,7 @@ import { generateKeyboard } from 'utils/keyboard'
 const Room: React.FC = () => {
   const { roomId } = useParams()
   const { user } = useAuth()
+  //const [firstQuote, setFirstQuote] = useState('Cannot get quote')
   const [quote, setQuote] = useState('Cannot get quote')
   const [players, setPlayers] = useState({})
   const [lobby, setLobby] = useState(true)
@@ -26,21 +27,43 @@ const Room: React.FC = () => {
   const [savedSettings, setSavedSettings] = useState(defaultGameOptions)
   const [saved, setSaved] = useState(true)
 
+  const [quoteList, setQuoteList] = useState({})
+  const [quoteIndex, setQuoteIndex] = useState(0)
+
   useEffect(() => {
-    if (user?.uid === roomId) {
-      getQuote().then((response) => {
-        setQuote(response.data.content)
-      })
-    } else {
-      get(ref(database, `rooms/${roomId}/quote`)).then((snapshot) => {
-        setQuote(snapshot.val())
+    if (user?.uid !== roomId) {
+      onValue(ref(database, `rooms/${roomId}/quoteList`), (snapshot) => {
+        setQuoteList(snapshot.val())
       })
     }
   }, [])
 
   useEffect(() => {
+    if (user?.uid !== roomId) {
+      console.log(quoteList)
+    }
+  }, [quoteList])
+
+  useEffect(() => {
+    if (user?.uid === roomId && quoteIndex < 7) {
+      getQuote().then((response) => {
+        setQuote(response.data.content)
+      })
+    }
+  }, [quoteIndex])
+
+  useEffect(() => {
     if (user?.uid === roomId) {
-      set(ref(database, `rooms/${roomId}/quote`), quote)
+      if (quoteIndex > 0) {
+        //set(ref(database, `rooms/${roomId}/quote`), quote)
+        setQuoteList({ ...quoteList, [quoteIndex]: quote })
+        if (Object.keys(quoteList).length === 7) {
+          set(ref(database, `/rooms/${roomId}/quoteList`), quoteList)
+        }
+      }
+      if (quoteIndex < 7) {
+        setQuoteIndex(quoteIndex + 1)
+      }
     }
   }, [quote])
 
@@ -60,7 +83,8 @@ const Room: React.FC = () => {
     for (const player in players) {
       numPlayers++
       nextWord[player] = ''
-      quoteLeft[player] = quote
+      console.log(quoteList[1 as keyof typeof quoteList])
+      quoteLeft[player] = quoteList[1 as keyof typeof quoteList]
     }
     if (numPlayers === 2) {
       set(ref(database, `rooms/${roomId}/nextWord`), nextWord)

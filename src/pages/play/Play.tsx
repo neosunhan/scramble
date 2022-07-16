@@ -38,7 +38,8 @@ function isOtherKey(str: string) {
 const Play: React.FC = () => {
   const { user } = useAuth()
   const { roomId } = useParams()
-  const [quote, setQuote] = useState('Unable to fetch quote from database')
+  const [quoteList, setQuoteList] = useState({})
+  const [currentRound, setCurrentRound] = useState(0)
   const [keys, setKeys] = useState<keyboardMap>(unshuffledMap)
   const [players, setPlayers] = useState({})
   const [gameDuration, setGameDuration] = useState(-1)
@@ -50,6 +51,7 @@ const Play: React.FC = () => {
     }, 1000),
   )
 
+  const [opponent, setOpponent] = useState('')
   const [input, setInput] = useState('')
   const [opponentInput, setOpponentInput] = useState('')
   const [cursor, setCursor] = useState(0)
@@ -59,14 +61,14 @@ const Play: React.FC = () => {
   const [gameEnd, setGameEnd] = useState(false)
   const userInputElement = React.useRef<HTMLInputElement>(null)
 
-  const [quoteLeft, setQuoteLeft] = useState(quote)
-  const words = quote.split(' ').map((s) => s + ' ')
-  const [nextWordIndex, setNextWordIndex] = useState(0)
+  const [quote, setQuote] = useState('Fetching quote')
+  const [quoteLeft, setQuoteLeft] = useState('@')
+  const [words, setWords] = useState(['words'])
+  //const words = quote.split(' ').map((s) => s + ' ')
+  const [nextWordIndex, setNextWordIndex] = useState(-1)
   const [opponentQuoteLeft, setOpponentQuoteLeft] = useState<string>('Initial')
 
   const [gameStats, setGameStats] = useState({})
-
-  let opponent = ''
 
   const insertTextAtCursor = (
     prev: string,
@@ -155,10 +157,11 @@ const Play: React.FC = () => {
       .then((snapshot) => {
         if (snapshot.exists()) {
           const roomObj = snapshot.val()
-          setQuote(roomObj['quote'])
+          setPlayers(roomObj['players'])
           setKeys(roomObj['keyMap'])
           setGameDuration(roomObj['gameOptions']['time'])
-          setPlayers(roomObj['players'])
+          setQuoteList(roomObj['quoteList'])
+          setCurrentRound(roomObj['currentRound'])
         } else {
         }
       })
@@ -187,12 +190,15 @@ const Play: React.FC = () => {
   useEffect(() => {
     if (Object.keys(players).length !== 0) {
       for (const player in players) {
-        console.log('for loop')
         if (player !== user?.uid) {
-          opponent = player
+          setOpponent(player)
         }
       }
+    }
+  }, [players])
 
+  useEffect(() => {
+    if (opponent !== '') {
       onValue(ref(database, `rooms/${roomId}/nextWord/${opponent}`), (snapshot) => {
         if (snapshot.exists()) {
           setOpponentInput(snapshot.val())
@@ -209,7 +215,16 @@ const Play: React.FC = () => {
         }
       })
     }
-  }, [players])
+  }, [opponent])
+
+  useEffect(() => {
+    if (quoteList && currentRound > 0) {
+      const currentQuote: string = quoteList[currentRound as keyof typeof quoteList]
+      setQuote(currentQuote)
+      setQuoteLeft(currentQuote)
+      setWords(currentQuote.split(' ').map((s) => s + ' '))
+    }
+  }, [quoteList, currentRound])
 
   useEffect(() => {
     if (input === words[nextWordIndex]) {
@@ -230,7 +245,7 @@ const Play: React.FC = () => {
   }, [input])
 
   useEffect(() => {
-    if (quoteLeft !== quote) {
+    if (quoteLeft !== '@') {
       setNextWordIndex(nextWordIndex + 1)
       if (!quoteLeft) {
         endGame()
@@ -249,11 +264,6 @@ const Play: React.FC = () => {
       endGame()
     }
   }, [time])
-
-  useEffect(() => {
-    setQuoteLeft(quote)
-    setOpponentQuoteLeft(quote)
-  }, [quote])
 
   return (
     <div className={styles.gameWindow}>
