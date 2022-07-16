@@ -232,8 +232,9 @@ const Room: React.FC = () => {
                       },
                     }}
                     axis='x'
-                    xmin={1}
+                    xmin={5}
                     xmax={300}
+                    xstep={5}
                     x={rightSettings().time}
                     onChange={({ x }) => setSettings({ ...settings, time: x })}
                   />

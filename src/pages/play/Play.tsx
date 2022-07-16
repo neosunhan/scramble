@@ -1,9 +1,13 @@
 import React, { useEffect, useState } from 'react'
 import { keyboardMap, unshuffledMap } from 'utils/keyboard'
-import { MultiplayerGame } from 'components'
-import { get, ref } from 'firebase/database'
+import { get, ref, onValue, set } from 'firebase/database'
 import { database } from 'config/firebaseConfig'
 import { useParams } from 'react-router-dom'
+import { useAuth } from 'hooks/useAuth'
+import { Keyboard, Timer, TextArea, TextDisplay } from 'components'
+import { GameEnd } from 'components/game/GameEnd'
+
+import styles from 'components/game/Game.module.css'
 
 export interface GameOptions {
   noShuffle: boolean
@@ -12,7 +16,27 @@ export interface GameOptions {
   time: number
 }
 
+const mapInput = (keys: keyboardMap, char: string): string => {
+  const upperChar = char.toUpperCase()
+  const newChar = keys[upperChar as keyof keyboardMap] ?? char
+  const isUpper = upperChar == char
+  return isUpper ? newChar : newChar.toLowerCase()
+}
+
+function isInput(str: string) {
+  return isLetter(str) || isOtherKey(str)
+}
+
+function isLetter(str: string) {
+  return str.length === 1 && str.match(/[a-z]/i)
+}
+
+function isOtherKey(str: string) {
+  return str.length === 1 && str.match(/[!"#$%&'()*+,-./:;<=>?@[\\\]^_`{|}~123456789 \b]/)
+}
+
 const Play: React.FC = () => {
+  const { user } = useAuth()
   const { roomId } = useParams()
   const [quote, setQuote] = useState('Unable to fetch quote from database')
   const [keys, setKeys] = useState<keyboardMap>(unshuffledMap)
@@ -25,6 +49,106 @@ const Play: React.FC = () => {
       return
     }, 1000),
   )
+
+  const [input, setInput] = useState('')
+  const [opponentInput, setOpponentInput] = useState('')
+  const [cursor, setCursor] = useState(0)
+  const dbInputRef = ref(database, `rooms/${roomId}/nextWord/${user?.uid}`)
+  const dbQuoteLeftRef = ref(database, `rooms/${roomId}/quoteLeft/${user?.uid}`)
+  const [gameResult, setGameResult] = useState('Tie!')
+  const [gameEnd, setGameEnd] = useState(false)
+  const userInputElement = React.useRef<HTMLInputElement>(null)
+
+  const [quoteLeft, setQuoteLeft] = useState(quote)
+  const words = quote.split(' ').map((s) => s + ' ')
+  const [nextWordIndex, setNextWordIndex] = useState(0)
+  const [opponentQuoteLeft, setOpponentQuoteLeft] = useState<string>('Initial')
+
+  const [gameStats, setGameStats] = useState({})
+
+  let opponent = ''
+
+  const insertTextAtCursor = (
+    prev: string,
+    input: string,
+    currentStart: number,
+    currentEnd: number,
+  ): string => {
+    let newString: string
+    if (currentStart == 0) {
+      setCursor(input.length)
+      newString = input + prev.substring(currentEnd, prev.length)
+    } else if (currentEnd == prev.length) {
+      setCursor(currentStart + input.length)
+      newString = prev.substring(0, currentStart) + input
+    } else {
+      setCursor(currentStart + input.length)
+      newString = prev.substring(0, currentStart) + input + prev.substring(currentEnd, prev.length)
+    }
+    set(dbInputRef, newString)
+    return newString
+  }
+
+  const backspaceAtCursor = (prev: string, currentStart: number, currentEnd: number): string => {
+    let newString: string
+    if (currentStart == currentEnd) {
+      if (currentStart != 0) {
+        setCursor(currentStart - 1)
+        newString = prev.substring(0, currentStart - 1) + prev.substring(currentStart, prev.length)
+      } else {
+        newString = prev
+      }
+      set(dbInputRef, newString)
+      return newString
+    } else {
+      return insertTextAtCursor(prev, '', currentStart, currentEnd)
+    }
+  }
+
+  const handleKeyDown = (e: React.KeyboardEvent<HTMLInputElement>) => {
+    if (e.ctrlKey || e.altKey || e.metaKey) {
+      return
+    }
+    if (document.activeElement == userInputElement.current) {
+      const value = e.key
+      const startIndex = userInputElement.current!.selectionStart
+      const endIndex = userInputElement.current!.selectionEnd
+      if (isInput(value)) {
+        setInput((prev) => insertTextAtCursor(prev, mapInput(keys, value), startIndex!, endIndex!))
+      } else if (value == 'Backspace') {
+        setInput((prev) => backspaceAtCursor(prev, startIndex!, endIndex!))
+      }
+    }
+  }
+
+  const endGame = () => {
+    if (!gameEnd) {
+      const wordsLeft = !quoteLeft ? 0 : quoteLeft.split(' ').length
+      const opponentWordsLeft = !opponentQuoteLeft ? 0 : opponentQuoteLeft.split(' ').length
+      const wordCount = words.length - wordsLeft
+      const opponentWordCount = words.length - opponentWordsLeft
+      const gameTime = gameDuration - time
+
+      if (wordCount > opponentWordCount) {
+        setGameResult('You win!')
+      } else if (wordCount < opponentWordCount) {
+        setGameResult('You lose!')
+      }
+
+      const stats = {
+        [user?.uid as string]: {
+          wordCount: wordCount,
+        },
+        opponent: {
+          wordCount: opponentWordCount,
+        },
+        gameTime: gameTime,
+      }
+      setGameStats(stats)
+      setGameEnd(true)
+      clearInterval(timer)
+    }
+  }
 
   useEffect(() => {
     get(ref(database, `rooms/${roomId}`))
@@ -61,21 +185,106 @@ const Play: React.FC = () => {
   }, [startTime])
 
   useEffect(() => {
-    if (time === 0) {
-      clearInterval(timer)
+    if (Object.keys(players).length !== 0) {
+      for (const player in players) {
+        console.log('for loop')
+        if (player !== user?.uid) {
+          opponent = player
+        }
+      }
+
+      onValue(ref(database, `rooms/${roomId}/nextWord/${opponent}`), (snapshot) => {
+        if (snapshot.exists()) {
+          setOpponentInput(snapshot.val())
+        } else {
+          console.log('Opponent nextWord not in db')
+        }
+      })
+
+      onValue(ref(database, `rooms/${roomId}/quoteLeft/${opponent}`), (snapshot) => {
+        if (snapshot.exists()) {
+          setOpponentQuoteLeft(snapshot.val())
+        } else {
+          console.log('Opponent quoteLeft not in db')
+        }
+      })
+    }
+  }, [players])
+
+  useEffect(() => {
+    if (input === words[nextWordIndex]) {
+      const nextSpaceIndex = quoteLeft.indexOf(' ')
+      if (nextSpaceIndex === -1) {
+        setInput('')
+        setQuoteLeft('')
+        set(dbInputRef, '')
+        set(dbQuoteLeftRef, '')
+      } else {
+        const tempQuote = quoteLeft.slice(nextSpaceIndex + 1)
+        setInput('')
+        setQuoteLeft(tempQuote)
+        set(dbInputRef, '')
+        set(dbQuoteLeftRef, tempQuote)
+      }
+    }
+  }, [input])
+
+  useEffect(() => {
+    if (quoteLeft !== quote) {
+      setNextWordIndex(nextWordIndex + 1)
+      if (!quoteLeft) {
+        endGame()
+      }
+    }
+  }, [quoteLeft])
+
+  useEffect(() => {
+    if (!opponentQuoteLeft) {
+      endGame()
+    }
+  }, [opponentQuoteLeft])
+
+  useEffect(() => {
+    if (time == 0) {
+      endGame()
     }
   }, [time])
 
+  useEffect(() => {
+    setQuoteLeft(quote)
+    setOpponentQuoteLeft(quote)
+  }, [quote])
+
   return (
-    <>
-      <MultiplayerGame
-        roomId={roomId as string}
-        keys={keys}
-        quote={quote}
-        time={time}
-        players={players}
-      />
-    </>
+    <div className={styles.gameWindow}>
+      <Timer time={time} />
+      <div className={styles.textContainerMP}>
+        <div className={styles.opponentDisplay}>{`${players[opponent as keyof typeof players]}
+          is typing...`}</div>
+        <TextDisplay quote={opponentQuoteLeft} input={opponentInput} />
+        <hr className={styles.separator}></hr>
+        <TextDisplay quote={quoteLeft} input={input} />
+      </div>
+      <div className={styles.inputContainer}>
+        <input
+          type='text'
+          autoFocus
+          className={styles.userInput}
+          ref={userInputElement}
+          value={input}
+          placeholder='Start typing!'
+          onChange={() => {
+            window.requestAnimationFrame(() => {
+              userInputElement.current!.setSelectionRange(cursor, cursor)
+            })
+          }}
+          onKeyDown={handleKeyDown}
+        ></input>
+      </div>
+      <Keyboard keys={keys}></Keyboard>
+
+      {gameEnd && <GameEnd outcomeMessage={gameResult} gameStats={gameStats} />}
+    </div>
   )
 }
 
