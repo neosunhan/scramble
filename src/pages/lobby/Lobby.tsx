@@ -5,22 +5,14 @@ import { ref, set, get, child } from 'firebase/database'
 import { Link, useNavigate } from 'react-router-dom'
 import { generateKeyboard } from 'utils/keyboard'
 import { defaultGameOptions } from 'components/firebase/RoomFunctions'
-import { getQuote } from 'api/quotes'
 
 import styles from './Lobby.module.css'
 
 const Lobby: React.FC = () => {
   const [roomToJoin, setRoomToJoin] = useState('')
   const [roomPax, setRoomPax] = useState(1)
-  const [quote, setQuote] = useState('Cannot get quote')
   const { user } = useAuth()
   const navigate = useNavigate()
-
-  useEffect(() => {
-    getQuote().then((response) => {
-      setQuote(response.data.content)
-    })
-  }, [])
 
   const createRoom = () => {
     const userId: string = user?.uid as string
@@ -31,7 +23,8 @@ const Lobby: React.FC = () => {
       },
       started: false,
       gameOptions: defaultGameOptions,
-      quote: quote,
+      quoteList: 'Cannot get quote',
+      numberOfRounds: 7,
       keyMap: generateKeyboard(defaultGameOptions),
     })
   }

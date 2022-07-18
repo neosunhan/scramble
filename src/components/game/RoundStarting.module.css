@@ -19,7 +19,7 @@
     pointer-events: auto;
   }
   
-  .gameEndWindow {
+  .roundStartWindow {
     position: relative;
     display: flex;
     flex-direction: column;
@@ -30,7 +30,7 @@
     background-color: white;
   }
 
-  .gameEndHeaderBar {
+  .roundStartHeaderBar {
     display: flex;
     justify-content: space-between;
     align-items: center;
@@ -38,21 +38,33 @@
     background-color: rgb(239, 241, 243);
   }
 
-  .outcomeMessage {
-    font-size: 30px;
+  .currentRound {
+    font-size: 32px;
     font-weight: bold;
     padding: 5px;
   }
 
-  .finalScoreTitle {
-    text-align: center;
-    font-size: 23px;
-    margin-top: 30px;
+  .scoreBoard {
+      font-size: 40px;
+      padding: 5px; 
   }
-  .finalScore {
+
+  .won {
+    color: orange;
+  }
+
+  .startingMessage {
+    margin-top: 30px;
     text-align: center;
-    font-weight: bold;
-    font-size: 30px;
+    font-size: 25px;
+  }
+  
+  .countdownTime {
+      font-size: 35px;
+      text-align: center;
+      margin-top: 20px;
+      margin-bottom: 5px;
+      color: red;
   }
 
   .gameStats {
@@ -61,21 +73,19 @@
     flex-direction: column;
     justify-content: space-around;
     align-items: center;
-    gap: 15px;
     padding: 20px;
   }
 
-  .gameAvg{
-    text-align: center;
-    text-decoration: underline;
-    font-size: 21px;
-    margin-top: 30px;
+  .roundResult {
+    text-align: center; 
+    font-size: 24px;
+    font-weight: 500;
   }
-  
-  .wpmAbbr {
-    margin-top: 10px;
+
+  .statsTitle {
+    margin-top: -10px;
     text-align: center;
-    font-size: 20px;
+    font-size: 21px;
   }
 
   .wpmContainer {
@@ -92,45 +102,4 @@
 
   .wpm {
     font-size: 25px;
-  }
-
-  .vsContainer {
-    font-size: 17px;
-    font-weight: bold;  
-  }
-
-  .buttonList {
-    display: flex;
-    flex-direction: column;
-    height: 80px;
-  }
-
-  .rematchButton {
-    flex:1;
-    font-size: 20px;
-    font-weight: 500;
-    background-color: #025802;
-    color: white;
-    cursor: pointer;  
-  }
-
-  .lobbyButtonContainer {
-    flex: 1;
-  }
-
-  .lobbyButton {
-    font-size: 20px;
-    font-weight: 500;
-    background-color: orange;
-    color: black;
-    cursor: pointer;  
-    height: 100%;
-    width: 100%;
-  }
-
-  .waitingForHost {
-    font-size: 20px;
-    flex: 1;
-    text-align: center;
-    padding: 8px 0px;
   }
