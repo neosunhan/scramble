@@ -23,7 +23,7 @@
     position: relative;
     display: flex;
     flex-direction: column;
-    height: 500px;
+    height: 550px;
     width: 400px;
     border: 1rem solid rgb(239, 241, 243);
     border-radius: 10px;
@@ -49,8 +49,12 @@
       padding: 5px; 
   }
 
+  .won {
+    color: orange;
+  }
+
   .startingMessage {
-    margin-top: 40px;
+    margin-top: 30px;
     text-align: center;
     font-size: 25px;
   }
@@ -59,6 +63,7 @@
       font-size: 35px;
       text-align: center;
       margin-top: 20px;
+      margin-bottom: 5px;
       color: red;
   }
 
@@ -71,7 +76,14 @@
     padding: 20px;
   }
 
+  .roundResult {
+    text-align: center; 
+    font-size: 24px;
+    font-weight: 500;
+  }
+
   .statsTitle {
+    margin-top: -10px;
     text-align: center;
     font-size: 21px;
   }

@@ -1,6 +1,6 @@
 import React, { useEffect, useState } from 'react'
 import { keyboardMap, unshuffledMap } from 'utils/keyboard'
-import { get, ref, onValue, set } from 'firebase/database'
+import { get, ref, onValue, set, increment } from 'firebase/database'
 import { database } from 'config/firebaseConfig'
 import { useParams } from 'react-router-dom'
 import { useAuth } from 'hooks/useAuth'
@@ -15,6 +15,7 @@ export interface GameOptions {
   withinHand: boolean
   withinRow: boolean
   time: number
+  numberOfRounds: number
 }
 
 const mapInput = (keys: keyboardMap, char: string): string => {
@@ -58,25 +59,52 @@ const Play: React.FC = () => {
   const [cursor, setCursor] = useState(0)
   const dbInputRef = ref(database, `rooms/${roomId}/nextWord/${user?.uid}`)
   const dbQuoteLeftRef = ref(database, `rooms/${roomId}/quoteLeft/${user?.uid}`)
-  const [gameResult, setGameResult] = useState('Tie!')
   const [gameEnd, setGameEnd] = useState(false)
   const userInputElement = React.useRef<HTMLInputElement>(null)
 
   const [quoteLeft, setQuoteLeft] = useState('@')
-  const [words, setWords] = useState(['words'])
-  //const words = quote.split(' ').map((s) => s + ' ')
+  const [opponentQuoteLeft, setOpponentQuoteLeft] = useState<string>('@')
+  const [words, setWords] = useState(['@'])
   const [nextWordIndex, setNextWordIndex] = useState(-1)
-  const [opponentQuoteLeft, setOpponentQuoteLeft] = useState<string>('Initial')
 
-  const [gameStats, setGameStats] = useState({})
+  const dbRoundStatsRef = ref(database, `rooms/${roomId}/roundStats/${user?.uid}`)
+  const dbGameStatsRef = ref(database, `rooms/${roomId}/gameStats/${user?.uid}`)
+  const dbScoreRef = ref(database, `rooms/${roomId}/score/${user?.uid}`)
 
-  const [roundStart, setRoundStart] = useState(false)
+  const [roundStats, setRoundStats] = useState({
+    wordCount: 0,
+    gameTime: 0,
+    round: 0,
+  })
+  const [opponentRoundStats, setOpponentRoundStats] = useState({
+    wordCount: 0,
+    gameTime: 0,
+    round: 0,
+  })
+  const [gameStats, setGameStats] = useState({
+    wordCount: 0,
+    gameTime: 0,
+  })
+  const [scoreBoard, setScoreBoard] = useState({})
+
+  const [roundStart, setRoundStart] = useState('@')
   const [countdown, setCountdown] = useState(
     setInterval(() => {
       return
     }, 1000),
   )
   const [countdownTime, setCountdownTime] = useState(5)
+  const [numberOfRounds, setNumberOfRounds] = useState(7)
+  const [roundResult, setRoundResult] = useState('Tied')
+  const startCountdown = () => {
+    const countdownStart = Date.now()
+    setCountdown(
+      setInterval(() => {
+        const difference = Math.floor((Date.now() - countdownStart) / 1000)
+        setCountdownTime(5 - difference)
+      }, 100),
+    )
+  }
 
   const insertTextAtCursor = (
     prev: string,
@@ -131,44 +159,47 @@ const Play: React.FC = () => {
     }
   }
 
-  const endGame = () => {
-    if (!gameEnd) {
-      const wordsLeft = !quoteLeft ? 0 : quoteLeft.split(' ').length
-      const opponentWordsLeft = !opponentQuoteLeft ? 0 : opponentQuoteLeft.split(' ').length
-      const wordCount = words.length - wordsLeft
-      const opponentWordCount = words.length - opponentWordsLeft
-      const gameTime = gameDuration - time
-
-      if (wordCount > opponentWordCount) {
-        setGameResult('You win!')
-      } else if (wordCount < opponentWordCount) {
-        setGameResult('You lose!')
+  const sumStats = (obj1: object, obj2: object) => {
+    return Object.keys(obj1).reduce((acc: any, key) => {
+      if (typeof obj2[key as keyof typeof obj2] === 'object') {
+        acc[key as keyof typeof acc] = sumStats(
+          obj1[key as keyof typeof obj1],
+          obj2[key as keyof typeof obj2],
+        )
+      } else if (obj2.hasOwnProperty(key)) {
+        acc[key as keyof typeof acc] =
+          obj1[key as keyof typeof obj1] + obj2[key as keyof typeof obj2]
       }
-
-      const stats = {
-        [user?.uid as string]: {
-          wordCount: wordCount,
-        },
-        opponent: {
-          wordCount: opponentWordCount,
-        },
-        gameTime: gameTime,
-      }
-      setGameStats(stats)
-      setGameEnd(true)
-      clearInterval(timer)
-    }
+      return acc
+    }, {})
   }
 
-  useEffect(() => {
-    const countdownStart = Date.now()
-    setCountdown(
-      setInterval(() => {
-        const difference = Math.floor((Date.now() - countdownStart) / 1000)
-        setCountdownTime(5 - difference)
-      }, 100),
-    )
+  const endRound = () => {
+    if (roundStart && !gameEnd) {
+      clearInterval(timer)
+      const wordsLeft = !quoteLeft ? 0 : quoteLeft.split(' ').length
+      const wordCount = words.length - wordsLeft
+      const gameTime = gameDuration - time
+      const statsObj = {
+        wordCount,
+        gameTime,
+        round: currentRound,
+      }
+      const gameStatsObj = sumStats(statsObj, gameStats)
+      setRoundStats(statsObj)
+      set(dbRoundStatsRef, statsObj)
+      setGameStats(gameStatsObj)
+      set(dbGameStatsRef, gameStatsObj)
 
+      setNextWordIndex(-1)
+      setInput('')
+      set(dbInputRef, '')
+      setCurrentRound(currentRound + 1)
+      setRoundStart('false')
+    }
+  }
+  useEffect(() => {
+    setRoundStart('false')
     get(ref(database, `rooms/${roomId}`))
       .then((snapshot) => {
         if (snapshot.exists()) {
@@ -177,36 +208,50 @@ const Play: React.FC = () => {
           setKeys(roomObj['keyMap'])
           setGameDuration(roomObj['gameOptions']['time'])
           setQuoteList(roomObj['quoteList'])
-          setCurrentRound(roomObj['currentRound'])
-        } else {
+          setCurrentRound(1)
+          setNumberOfRounds(roomObj['gameOptions']['numberOfRounds'])
         }
       })
       .catch((error) => {
         console.error(error)
       })
+
+    onValue(ref(database, `rooms/${roomId}/score`), (snapshot) => {
+      if (snapshot.exists()) {
+        setScoreBoard(snapshot.val())
+      }
+    })
   }, [])
 
   useEffect(() => {
-    if (countdownTime === 0) {
-      setRoundStart(true)
+    if (countdownTime === 0 && !gameEnd) {
+      setRoundStart('true')
+      clearInterval(countdown)
+      setCountdownTime(5)
     }
   }, [countdownTime])
 
   useEffect(() => {
-    setTime(gameDuration)
-    if (gameDuration >= 0 && roundStart) {
-      setStartTime(Date.now())
+    if (!gameEnd) {
+      if (roundStart === 'false') {
+        setTime(gameDuration)
+      }
+      if (gameDuration >= 0 && roundStart === 'true') {
+        setStartTime(Date.now())
+      }
     }
   }, [gameDuration, roundStart])
 
   useEffect(() => {
-    if (gameDuration >= 0 && startTime >= 0) {
-      setTimer(
-        setInterval(() => {
-          const difference = Math.floor((Date.now() - startTime) / 1000)
-          setTime(gameDuration - difference)
-        }, 100),
-      )
+    if (!gameEnd) {
+      if (gameDuration >= 0 && startTime >= 0) {
+        setTimer(
+          setInterval(() => {
+            const difference = Math.floor((Date.now() - startTime) / 1000)
+            setTime(gameDuration - difference)
+          }, 100),
+        )
+      }
     }
   }, [startTime])
 
@@ -237,14 +282,26 @@ const Play: React.FC = () => {
           console.log('Opponent quoteLeft not in db')
         }
       })
+
+      onValue(ref(database, `rooms/${roomId}/roundStats/${opponent}`), (snapshot) => {
+        if (snapshot.exists()) {
+          setOpponentRoundStats(snapshot.val())
+        }
+      })
     }
   }, [opponent])
 
   useEffect(() => {
-    if (quoteList && currentRound > 0) {
-      const currentQuote: string = quoteList[currentRound as keyof typeof quoteList]
-      setQuoteLeft(currentQuote)
-      setWords(currentQuote.split(' ').map((s) => s + ' '))
+    if (!gameEnd) {
+      if (quoteList && currentRound > 0) {
+        if (currentRound > numberOfRounds) {
+          setGameEnd(true)
+        }
+        const currentQuote: string = quoteList[currentRound as keyof typeof quoteList]
+        set(dbQuoteLeftRef, currentQuote)
+        setQuoteLeft(currentQuote)
+        setWords(currentQuote.split(' ').map((s) => s + ' '))
+      }
     }
   }, [quoteList, currentRound])
 
@@ -252,10 +309,8 @@ const Play: React.FC = () => {
     if (input === words[nextWordIndex]) {
       const nextSpaceIndex = quoteLeft.indexOf(' ')
       if (nextSpaceIndex === -1) {
-        setInput('')
-        setQuoteLeft('')
-        set(dbInputRef, '')
         set(dbQuoteLeftRef, '')
+        setQuoteLeft('')
       } else {
         const tempQuote = quoteLeft.slice(nextSpaceIndex + 1)
         setInput('')
@@ -270,22 +325,67 @@ const Play: React.FC = () => {
     if (quoteLeft !== '@') {
       setNextWordIndex(nextWordIndex + 1)
       if (!quoteLeft) {
-        endGame()
+        endRound()
       }
     }
   }, [quoteLeft])
 
   useEffect(() => {
     if (!opponentQuoteLeft) {
-      endGame()
+      endRound()
     }
   }, [opponentQuoteLeft])
 
   useEffect(() => {
     if (time == 0) {
-      endGame()
+      endRound()
     }
   }, [time])
+
+  useEffect(() => {
+    if (!gameEnd) {
+      if (roundStart === 'false') {
+        startCountdown()
+        userInputElement.current?.blur()
+      } else if (roundStart === 'true') {
+        userInputElement.current?.focus()
+      }
+    }
+  }, [roundStart])
+
+  useEffect(() => {
+    if (
+      roundStats['round'] === opponentRoundStats['round' as keyof typeof opponentRoundStats] &&
+      roundStats['round'] > 0
+    ) {
+      const wordCount = roundStats['wordCount']
+      const opponentWordCount = opponentRoundStats['wordCount' as keyof typeof opponentRoundStats]
+      if (wordCount > opponentWordCount) {
+        set(dbScoreRef, increment(1))
+        setRoundResult('won')
+      } else if (wordCount < opponentWordCount) {
+        setRoundResult('lost')
+      } else {
+        setRoundResult('Tied')
+      }
+    }
+  }, [roundStats, opponentRoundStats])
+
+  useEffect(() => {
+    if (Object.keys(scoreBoard).length > 0) {
+      const score = scoreBoard[user?.uid as keyof typeof scoreBoard]
+      const opponentScore = scoreBoard[opponent as keyof typeof scoreBoard]
+      if (score >= numberOfRounds / 2) {
+        setGameEnd(true)
+      } else if (opponentScore >= numberOfRounds / 2) {
+        setGameEnd(true)
+      }
+    }
+  }, [scoreBoard])
+
+  useEffect(() => {
+    clearInterval(timer)
+  }, [gameEnd])
 
   return (
     <div className={styles.gameWindow}>
@@ -300,7 +400,6 @@ const Play: React.FC = () => {
       <div className={styles.inputContainer}>
         <input
           type='text'
-          autoFocus
           className={styles.userInput}
           ref={userInputElement}
           value={input}
@@ -315,10 +414,16 @@ const Play: React.FC = () => {
       </div>
       <Keyboard keys={keys}></Keyboard>
 
-      {!roundStart && (
-        <RoundStarting round={currentRound} countdownTime={countdownTime} gameStats={gameStats} />
+      {roundStart === 'false' && !gameEnd && (
+        <RoundStarting
+          roundResult={roundResult}
+          round={currentRound}
+          numberOfRounds={numberOfRounds}
+          countdownTime={countdownTime}
+          opponent={opponent}
+        />
       )}
-      {gameEnd && <GameEnd outcomeMessage={gameResult} gameStats={gameStats} />}
+      {gameEnd && <GameEnd opponent={opponent} />}
     </div>
   )
 }

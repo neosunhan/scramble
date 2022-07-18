@@ -40,4 +40,5 @@ export const defaultGameOptions: GameOptions = {
   withinHand: true,
   withinRow: true,
   time: 150,
+  numberOfRounds: 5,
 }
