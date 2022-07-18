@@ -103,7 +103,7 @@ const Room: React.FC = () => {
   }
 
   useEffect(() => {
-    const playersRef = ref(database, `/rooms/${roomId}/players`)
+    const playersRef = ref(database, `rooms/${roomId}/players`)
     onValue(playersRef, (snapshot) => {
       if (snapshot.exists()) {
         setPlayers(snapshot.val())
@@ -114,7 +114,7 @@ const Room: React.FC = () => {
   }, [roomId])
 
   useEffect(() => {
-    const startedRef = ref(database, `/rooms/${roomId}/started`)
+    const startedRef = ref(database, `rooms/${roomId}/started`)
 
     onValue(startedRef, (snapshot) => {
       if (snapshot.val()) {
