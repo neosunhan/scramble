@@ -20,8 +20,8 @@ const Room: React.FC = () => {
   const [lobby, setLobby] = useState(true)
   const navigate = useNavigate()
 
-  const gameOptionsRef = ref(database, `/rooms/${roomId}/gameOptions`)
-  const keyMapRef = ref(database, `/rooms/${roomId}/keyMap`)
+  const gameOptionsRef = ref(database, `rooms/${roomId}/gameOptions`)
+  const keyMapRef = ref(database, `rooms/${roomId}/keyMap`)
   const [settings, setSettings] = useState(defaultGameOptions)
   const [savedSettings, setSavedSettings] = useState(defaultGameOptions)
   const [saved, setSaved] = useState(true)
@@ -50,7 +50,7 @@ const Room: React.FC = () => {
       if (quoteIndex > 0) {
         setQuoteList({ ...quoteList, [quoteIndex]: quote })
         if (Object.keys(quoteList).length === 7) {
-          set(ref(database, `/rooms/${roomId}/quoteList`), quoteList)
+          set(ref(database, `rooms/${roomId}/quoteList`), quoteList)
         }
       }
       if (quoteIndex < 7) {
@@ -103,7 +103,7 @@ const Room: React.FC = () => {
   }
 
   useEffect(() => {
-    const playersRef = ref(database, `/rooms/${roomId}/players`)
+    const playersRef = ref(database, `rooms/${roomId}/players`)
     onValue(playersRef, (snapshot) => {
       if (snapshot.exists()) {
         setPlayers(snapshot.val())
@@ -114,7 +114,7 @@ const Room: React.FC = () => {
   }, [roomId])
 
   useEffect(() => {
-    const startedRef = ref(database, `/rooms/${roomId}/started`)
+    const startedRef = ref(database, `rooms/${roomId}/started`)
 
     onValue(startedRef, (snapshot) => {
       if (snapshot.val()) {
