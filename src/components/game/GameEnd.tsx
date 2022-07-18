@@ -37,7 +37,6 @@ const GameEnd: React.FC<GameEndProps> = ({ opponent }) => {
       started: false,
       gameOptions: defaultGameOptions,
       quoteList: 'Cannot get quote',
-      numberOfRounds: 7,
       keyMap: generateKeyboard(defaultGameOptions),
       score: {
         [user?.uid as string]: score,

@@ -20,8 +20,8 @@ const Room: React.FC = () => {
   const [lobby, setLobby] = useState(true)
   const navigate = useNavigate()
 
-  const gameOptionsRef = ref(database, `/rooms/${roomId}/gameOptions`)
-  const keyMapRef = ref(database, `/rooms/${roomId}/keyMap`)
+  const gameOptionsRef = ref(database, `rooms/${roomId}/gameOptions`)
+  const keyMapRef = ref(database, `rooms/${roomId}/keyMap`)
   const [settings, setSettings] = useState(defaultGameOptions)
   const [savedSettings, setSavedSettings] = useState(defaultGameOptions)
   const [saved, setSaved] = useState(true)
@@ -50,7 +50,7 @@ const Room: React.FC = () => {
       if (quoteIndex > 0) {
         setQuoteList({ ...quoteList, [quoteIndex]: quote })
         if (Object.keys(quoteList).length === 7) {
-          set(ref(database, `/rooms/${roomId}/quoteList`), quoteList)
+          set(ref(database, `rooms/${roomId}/quoteList`), quoteList)
         }
       }
       if (quoteIndex < 7) {
