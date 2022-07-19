@@ -192,8 +192,6 @@ const Play: React.FC = () => {
       set(dbGameStatsRef, gameStatsObj)
 
       setNextWordIndex(-1)
-      setInput('')
-      set(dbInputRef, '')
       setCurrentRound(currentRound + 1)
       setRoundStart('false')
     }
@@ -345,6 +343,8 @@ const Play: React.FC = () => {
   useEffect(() => {
     if (!gameEnd) {
       if (roundStart === 'false') {
+        setInput('')
+        set(dbInputRef, '')
         startCountdown()
         userInputElement.current?.blur()
       } else if (roundStart === 'true') {
