@@ -23,7 +23,7 @@ const Lobby: React.FC = () => {
       },
       started: false,
       gameOptions: defaultGameOptions,
-      quoteList: 'Cannot get quote',
+      quoteList: { [0]: 'Cannot get quote' },
       numberOfRounds: 7,
       keyMap: generateKeyboard(defaultGameOptions),
     })
