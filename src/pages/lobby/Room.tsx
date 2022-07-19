@@ -39,28 +39,30 @@ const Room: React.FC = () => {
 
   useEffect(() => {
     if (user?.uid === roomId && quoteIndex < 7) {
-      console.log('Fetching quote ' + quoteIndex)
       getQuote().then((response) => {
         setQuote(response.data.content)
-        console.log('Fetched quote: ' + response.data.content)
       })
     }
   }, [quoteIndex])
 
   useEffect(() => {
-    console.log('Current Quote: ' + quote)
     if (user?.uid === roomId) {
       if (quoteIndex > 0) {
         setQuoteList({ ...quoteList, [quoteIndex]: quote })
-        if (Object.keys(quoteList).length === 7) {
-          set(ref(database, `rooms/${roomId}/quoteList`), quoteList)
-        }
       }
       if (quoteIndex < 7) {
         setQuoteIndex(quoteIndex + 1)
       }
     }
   }, [quote])
+
+  useEffect(() => {
+    console.log(quoteList)
+    if (Object.keys(quoteList).length === 7) {
+      console.log('Setting quoteList')
+      set(ref(database, `rooms/${roomId}/quoteList`), quoteList)
+    }
+  }, [quoteList])
 
   const leaveRoom = () => {
     if (user?.uid === roomId) {
