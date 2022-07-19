@@ -30,18 +30,15 @@ const GameEnd: React.FC<GameEndProps> = ({ opponent }) => {
 
   const [roomSnapshot, setRoomSnapshot] = useState({})
 
-  const resetRoom = () => {
+  const resetRoom = (snapshot: object) => {
     setHostRematch(0)
     set(roomRef, {
+      ...snapshot,
       players: {},
       started: false,
       gameOptions: defaultGameOptions,
       quoteList: 'Cannot get quote',
       keyMap: generateKeyboard(defaultGameOptions),
-      score: {
-        [user?.uid as string]: score,
-        [opponent]: opponentScore,
-      },
     })
   }
 
@@ -64,9 +61,8 @@ const GameEnd: React.FC<GameEndProps> = ({ opponent }) => {
     get(ref(database, `rooms/${roomId}`))
       .then((snapshot) => {
         if (snapshot.exists()) {
-          if (Object.keys(roomSnapshot).length === 0) {
-            setRoomSnapshot(snapshot.val())
-          }
+          setRoomSnapshot(snapshot.val())
+          resetRoom(snapshot.val())
         }
       })
       .catch((error) => {
@@ -87,7 +83,7 @@ const GameEnd: React.FC<GameEndProps> = ({ opponent }) => {
   }, [])
 
   useEffect(() => {
-    if ('gameStats' in roomSnapshot && opponent !== '') {
+    if (Object.keys(roomSnapshot).length > 0 && opponent !== '') {
       setGameStats(roomSnapshot['gameStats' as keyof typeof roomSnapshot])
       const scoreObj = roomSnapshot['score' as keyof typeof roomSnapshot]
       setScore(scoreObj[user?.uid as string])
@@ -110,7 +106,6 @@ const GameEnd: React.FC<GameEndProps> = ({ opponent }) => {
 
   useEffect(() => {
     if (score >= 0 && opponentScore >= 0) {
-      resetRoom()
       if (score > opponentScore) {
         setOutcomeMessage('You won the game!')
       } else if (score < opponentScore) {

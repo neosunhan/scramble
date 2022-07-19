@@ -32,7 +32,9 @@ const Room: React.FC = () => {
   useEffect(() => {
     if (user?.uid !== roomId) {
       onValue(ref(database, `rooms/${roomId}/quoteList`), (snapshot) => {
-        setQuoteList(snapshot.val())
+        if (snapshot.exists()) {
+          setQuoteList(snapshot.val())
+        }
       })
     }
   }, [])
@@ -57,9 +59,7 @@ const Room: React.FC = () => {
   }, [quote])
 
   useEffect(() => {
-    console.log(quoteList)
     if (Object.keys(quoteList).length === 7) {
-      console.log('Setting quoteList')
       set(ref(database, `rooms/${roomId}/quoteList`), quoteList)
     }
   }, [quoteList])
