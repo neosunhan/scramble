@@ -1,6 +1,6 @@
 import React, { useEffect, useState } from 'react'
 import { Link, useParams, useNavigate } from 'react-router-dom'
-import { remove, ref, onValue, get, set } from 'firebase/database'
+import { remove, ref, onValue, set } from 'firebase/database'
 import { database } from 'config/firebaseConfig'
 import { useAuth } from 'hooks/useAuth'
 import { getQuote } from 'api/quotes'

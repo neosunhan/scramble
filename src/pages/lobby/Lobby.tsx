@@ -22,6 +22,7 @@ const Lobby: React.FC = () => {
         [userId]: user?.displayName,
       },
       started: false,
+      powerupAvailable: true,
       gameOptions: defaultGameOptions,
       quoteList: { [0]: 'Cannot get quote' },
       keyMap: generateKeyboard(defaultGameOptions),
