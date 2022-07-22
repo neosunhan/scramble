@@ -11,32 +11,32 @@
     align-items: flex-start;
     height: 100%;
     width: 80%; 
-    gap: 120px;
+    gap: 7.5rem;
     margin: auto;
     color: #90ee90;
-    padding: 0 50px;
+    padding: 0 3.125rem;
 }
 
 .createRoom {
     display: flex;
     flex-direction: column;
     align-items: flex-start;
-    gap: 30px;
-    font-size: 50px;
+    gap: 1.875rem;
+    font-size: 3.125rem;
 }
 
 .joinRoomContainer {
     display: flex;
     flex-direction: column;
     align-items: flex-start;
-    gap: 30px;
-    font-size: 50px;
+    gap: 1.875rem;
+    font-size: 3.125rem;
 }
 
 .roomInput {
     width: 100vh;
-    font-size: 25px;
-    padding: 10px 15px;
+    font-size: 1.5625rem;
+    padding: 0.625rem 0.9375rem;
     color: white;
     background-color: transparent;
     border: 1px solid white;
@@ -45,20 +45,20 @@
 }
 
 .lobbyButton, .joinRoomButton {
-    font-size: 50px;
+    font-size: 3.125rem;
     border: none;
     background: none;
     color: #d3d3d3;
     cursor: pointer;
-    padding: 0.25em 0.5em;
+    padding: 0.78125rem 1.5625rem;
     border: 3px solid;
-    border-radius: 1em;
+    border-radius: 3.125rem;
     box-shadow: inset 0 0 0 0 #f9e506;
     transition: ease-out 0.3s;
   }
   
 .lobbyButton:hover {
-    box-shadow: inset 450px 0 0 0 #f9e506;
+    box-shadow: inset 28.125rem 0 0 0 #f9e506;
     cursor: pointer;
     color: black;
 }
