@@ -18,6 +18,14 @@ export interface GameOptions {
   numberOfRounds: number
 }
 
+const powerups: { [input: number]: { [input: string]: string } } = {
+  1: {
+    name: 'skip',
+    text: 'skip',
+    description: 'skip word',
+  },
+}
+
 const mapInput = (keys: keyboardMap, char: string): string => {
   const upperChar = char.toUpperCase()
   const newChar = keys[upperChar as keyof keyboardMap] ?? char
@@ -63,11 +71,13 @@ const Play: React.FC = () => {
   const userInputElement = React.useRef<HTMLInputElement>(null)
 
   const dbPowerupAvailableRef = ref(database, `rooms/${roomId}/powerupAvailable`)
+  const [powerup, setPowerup] = useState(1)
   const [powerupAvailable, setPowerupAvailable] = useState(false)
   const [powerupMode, setPowerupMode] = useState(false)
-  const [powerupQuote, setPowerupQuote] = useState('Powerup')
+  const [powerupQuote, setPowerupQuote] = useState(powerups[powerup]['text'])
   const [powerupInput, setPowerupInput] = useState('')
   const [powerupCursor, setPowerupCursor] = useState(0)
+  const [powerupEarned, setPowerupEarned] = useState(false)
 
   const [quoteLeft, setQuoteLeft] = useState('@')
   const [opponentQuoteLeft, setOpponentQuoteLeft] = useState<string>('@')
@@ -193,6 +203,13 @@ const Play: React.FC = () => {
     if (powerupAvailable && e.ctrlKey) {
       setPowerupMode(true)
       userInputElement.current?.focus()
+      return
+    }
+    if (powerupEarned && e.ctrlKey) {
+      if (powerup === 1) {
+        setInput(words[nextWordIndex])
+      }
+      setPowerupEarned(false)
       return
     }
     if (e.ctrlKey || e.altKey || e.metaKey) {
@@ -410,6 +427,7 @@ const Play: React.FC = () => {
   useEffect(() => {
     if (powerupQuote && powerupQuote === powerupInput) {
       set(dbPowerupAvailableRef, false)
+      setPowerupEarned(true)
     }
   }, [powerupInput])
 
