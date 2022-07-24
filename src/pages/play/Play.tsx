@@ -445,7 +445,6 @@ const Play: React.FC = () => {
     onValue(ref(database, `rooms/${roomId}/powerup`), (snapshot) => {
       if (snapshot.exists()) {
         console.log(snapshot.val())
-        setPowerup(snapshot.val())
         setPowerupDescription(powerups[snapshot.val()]['description'])
         setPowerupQuote(powerups[snapshot.val()]['text'])
       } else {
