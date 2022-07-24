@@ -72,6 +72,7 @@ const Play: React.FC = () => {
   const [powerupInput, setPowerupInput] = useState('')
   const [powerupCursor, setPowerupCursor] = useState(0)
   const [powerupEarned, setPowerupEarned] = useState(false)
+  const [powerupUsed, setPowerupUsed] = useState(false)
   const [showKeyboard, setShowKeyboard] = useState(true)
 
   const [quoteLeft, setQuoteLeft] = useState('@')
@@ -200,7 +201,7 @@ const Play: React.FC = () => {
       userInputElement.current?.focus()
       return
     }
-    if (powerupEarned && e.ctrlKey) {
+    if (powerupEarned && e.ctrlKey && !powerupUsed) {
       switch (powerup) {
         case 0:
           setInput(words[nextWordIndex])
@@ -218,7 +219,7 @@ const Play: React.FC = () => {
         default:
           console.log(`Powerup ${powerup} not recognized`)
       }
-      setPowerupEarned(false)
+      setPowerupUsed(true)
       return
     }
     if (e.ctrlKey || e.altKey || e.metaKey) {
@@ -301,6 +302,7 @@ const Play: React.FC = () => {
       setPowerupInput('')
       setPowerupCursor(0)
       setPowerupEarned(false)
+      setPowerupUsed(false)
       setShowKeyboard(true)
 
       setNextWordIndex(-1)
@@ -444,7 +446,7 @@ const Play: React.FC = () => {
 
     onValue(ref(database, `rooms/${roomId}/powerup`), (snapshot) => {
       if (snapshot.exists()) {
-        console.log(snapshot.val())
+        setPowerup(snapshot.val())
         setPowerupDescription(powerups[snapshot.val()]['description'])
         setPowerupQuote(powerups[snapshot.val()]['text'])
       } else {
@@ -545,7 +547,18 @@ const Play: React.FC = () => {
   return (
     <div className={styles.gameWindow}>
       <Timer time={time} />
-      <div>Powerup: {powerupDescription}</div>
+      <p>Powerup: {powerupDescription}</p>
+      {powerupAvailable ? (
+        <p>Press CTRL to compete for the powerup!</p>
+      ) : powerupEarned ? (
+        powerupUsed ? (
+          <p>Powerup used! Look out for the new powerup next round!</p>
+        ) : (
+          <p>Press CTRL before the end of the round to use the Powerup!</p>
+        )
+      ) : (
+        <p>Opponent has earned the powerup. Better luck next time!</p>
+      )}
       {powerupAvailable && powerupMode ? (
         <>
           <div className={styles.textContainerMP}>
