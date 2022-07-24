@@ -1,6 +1,6 @@
 import React, { useEffect, useState } from 'react'
 import { Link, useParams, useNavigate } from 'react-router-dom'
-import { remove, ref, onValue, get, set } from 'firebase/database'
+import { remove, ref, onValue, set } from 'firebase/database'
 import { database } from 'config/firebaseConfig'
 import { useAuth } from 'hooks/useAuth'
 import { getQuote } from 'api/quotes'
@@ -10,6 +10,7 @@ import { Checkbox } from 'components'
 import Slider from 'react-input-slider'
 
 import { defaultGameOptions } from 'components/firebase/RoomFunctions'
+import { powerups } from 'components/powerups/powerups'
 import { generateKeyboard } from 'utils/keyboard'
 
 const Room: React.FC = () => {
@@ -79,6 +80,7 @@ const Room: React.FC = () => {
     const roundStats: { [input: string]: object } = {}
     const gameStats: { [input: string]: object } = {}
     const score: { [input: string]: number } = {}
+    const displayKeyboard: { [input: string]: boolean } = {}
 
     for (const player in players) {
       numPlayers++
@@ -94,6 +96,7 @@ const Room: React.FC = () => {
         gameTime: 0,
       }
       score[player] = 0
+      displayKeyboard[player] = true
     }
     if (numPlayers === 2) {
       set(ref(database, `rooms/${roomId}/nextWord`), nextWord)
@@ -101,6 +104,11 @@ const Room: React.FC = () => {
       set(ref(database, `rooms/${roomId}/roundStats`), roundStats)
       set(ref(database, `rooms/${roomId}/gameStats`), gameStats)
       set(ref(database, `rooms/${roomId}/score`), score)
+      set(ref(database, `rooms/${roomId}/displayKeyboard`), displayKeyboard)
+      set(
+        ref(database, `rooms/${roomId}/powerup`),
+        Math.floor(Math.random() * Object.keys(powerups).length),
+      )
       set(ref(database, `rooms/${roomId}/started`), true)
     } else {
       alert('Number of players is not 2!')

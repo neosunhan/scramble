@@ -1,4 +1,4 @@
-import React, { useEffect, useState } from 'react'
+import React, { useState } from 'react'
 import { useAuth } from 'hooks/useAuth'
 import { database } from 'config/firebaseConfig'
 import { ref, set, get, child } from 'firebase/database'
@@ -22,6 +22,7 @@ const Lobby: React.FC = () => {
         [userId]: user?.displayName,
       },
       started: false,
+      powerupAvailable: true,
       gameOptions: defaultGameOptions,
       quoteList: { [0]: 'Cannot get quote' },
       keyMap: generateKeyboard(defaultGameOptions),
