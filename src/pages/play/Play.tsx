@@ -22,12 +22,17 @@ const powerups: { [input: number]: { [input: string]: string } } = {
   1: {
     name: 'skip',
     text: 'skip',
-    description: 'Skip Word',
+    description: 'Skip word',
   },
   2: {
     name: 'unscramble',
     text: 'unscramble',
-    description: 'Unscramble Keyboard for 10 seconds',
+    description: 'Unscramble keyboard for 10 seconds',
+  },
+  3: {
+    name: 'hide',
+    text: 'hide keyboard',
+    description: "Hide opponent's keyboard for 10 seconds",
   },
 }
 
@@ -84,8 +89,7 @@ const Play: React.FC = () => {
   const [powerupInput, setPowerupInput] = useState('')
   const [powerupCursor, setPowerupCursor] = useState(0)
   const [powerupEarned, setPowerupEarned] = useState(false)
-  const [powerupActive, setPowerupActive] = useState(false)
-  const [powerupExpiry, setPowerupExpiry] = useState(0)
+  const [showKeyboard, setShowKeyboard] = useState(true)
 
   const [quoteLeft, setQuoteLeft] = useState('@')
   const [opponentQuoteLeft, setOpponentQuoteLeft] = useState<string>('@')
@@ -214,12 +218,22 @@ const Play: React.FC = () => {
       return
     }
     if (powerupEarned && e.ctrlKey) {
-      if (powerup === 1) {
-        setInput(words[nextWordIndex])
-      } else if (powerup === 2) {
-        setKeys(unshuffledMap)
-        setPowerupActive(true)
-        setPowerupExpiry(time - 10)
+      switch (powerup) {
+        case 1:
+          setInput(words[nextWordIndex])
+          break
+        case 2:
+          const scrambled = keys
+          setKeys(unshuffledMap)
+          setTimeout(() => {
+            setKeys(scrambled)
+          }, 10000)
+          break
+        case 3:
+          set(ref(database, `rooms/${roomId}/displayKeyboard/${opponent}`), false)
+          break
+        default:
+          console.log(`Powerup ${powerup} not recognized`)
       }
       setPowerupEarned(false)
       return
@@ -435,6 +449,19 @@ const Play: React.FC = () => {
         console.log('powerupAvailable not in db')
       }
     })
+    onValue(ref(database, `rooms/${roomId}/displayKeyboard/${user?.uid}`), (snapshot) => {
+      if (snapshot.exists()) {
+        if (!snapshot.val()) {
+          setShowKeyboard(false)
+          set(ref(database, `rooms/${roomId}/displayKeyboard/${user?.uid}`), true)
+          setTimeout(() => {
+            setShowKeyboard(true)
+          }, 10000)
+        }
+      } else {
+        console.log('displayKeyboard not in db')
+      }
+    })
   }, [])
 
   useEffect(() => {
@@ -462,11 +489,6 @@ const Play: React.FC = () => {
   useEffect(() => {
     if (time == 0) {
       endRound()
-    } else if (powerupActive && time <= powerupExpiry) {
-      if (powerup === 2) {
-        setKeys(keysBackup)
-        setPowerupActive(false)
-      }
     }
   }, [time])
 
@@ -573,8 +595,7 @@ const Play: React.FC = () => {
           </div>
         </>
       )}
-      <Keyboard keys={keys}></Keyboard>
-
+      {showKeyboard ? <Keyboard keys={keys}></Keyboard> : <div>Keyboard hidden by opponent</div>}
       {roundStart === 'false' && !gameEnd && (
         <RoundStarting
           roundResult={roundResult}

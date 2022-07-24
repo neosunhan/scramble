@@ -79,6 +79,7 @@ const Room: React.FC = () => {
     const roundStats: { [input: string]: object } = {}
     const gameStats: { [input: string]: object } = {}
     const score: { [input: string]: number } = {}
+    const displayKeyboard: { [input: string]: boolean } = {}
 
     for (const player in players) {
       numPlayers++
@@ -94,6 +95,7 @@ const Room: React.FC = () => {
         gameTime: 0,
       }
       score[player] = 0
+      displayKeyboard[player] = true
     }
     if (numPlayers === 2) {
       set(ref(database, `rooms/${roomId}/nextWord`), nextWord)
@@ -101,6 +103,7 @@ const Room: React.FC = () => {
       set(ref(database, `rooms/${roomId}/roundStats`), roundStats)
       set(ref(database, `rooms/${roomId}/gameStats`), gameStats)
       set(ref(database, `rooms/${roomId}/score`), score)
+      set(ref(database, `rooms/${roomId}/displayKeyboard`), displayKeyboard)
       set(ref(database, `rooms/${roomId}/started`), true)
     } else {
       alert('Number of players is not 2!')
