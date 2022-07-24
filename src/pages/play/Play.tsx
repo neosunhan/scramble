@@ -22,7 +22,12 @@ const powerups: { [input: number]: { [input: string]: string } } = {
   1: {
     name: 'skip',
     text: 'skip',
-    description: 'skip word',
+    description: 'Skip Word',
+  },
+  2: {
+    name: 'unscramble',
+    text: 'unscramble',
+    description: 'Unscramble Keyboard for 10 seconds',
   },
 }
 
@@ -51,6 +56,7 @@ const Play: React.FC = () => {
   const [quoteList, setQuoteList] = useState({})
   const [currentRound, setCurrentRound] = useState(0)
   const [keys, setKeys] = useState<keyboardMap>(unshuffledMap)
+  const [keysBackup, setKeysBackup] = useState<keyboardMap>(unshuffledMap)
   const [players, setPlayers] = useState({})
   const [gameDuration, setGameDuration] = useState(-1)
   const [time, setTime] = useState(-1)
@@ -71,13 +77,15 @@ const Play: React.FC = () => {
   const userInputElement = React.useRef<HTMLInputElement>(null)
 
   const dbPowerupAvailableRef = ref(database, `rooms/${roomId}/powerupAvailable`)
-  const [powerup, setPowerup] = useState(1)
+  const [powerup, setPowerup] = useState(2)
   const [powerupAvailable, setPowerupAvailable] = useState(false)
   const [powerupMode, setPowerupMode] = useState(false)
   const [powerupQuote, setPowerupQuote] = useState(powerups[powerup]['text'])
   const [powerupInput, setPowerupInput] = useState('')
   const [powerupCursor, setPowerupCursor] = useState(0)
   const [powerupEarned, setPowerupEarned] = useState(false)
+  const [powerupActive, setPowerupActive] = useState(false)
+  const [powerupExpiry, setPowerupExpiry] = useState(0)
 
   const [quoteLeft, setQuoteLeft] = useState('@')
   const [opponentQuoteLeft, setOpponentQuoteLeft] = useState<string>('@')
@@ -208,6 +216,10 @@ const Play: React.FC = () => {
     if (powerupEarned && e.ctrlKey) {
       if (powerup === 1) {
         setInput(words[nextWordIndex])
+      } else if (powerup === 2) {
+        setKeys(unshuffledMap)
+        setPowerupActive(true)
+        setPowerupExpiry(time - 10)
       }
       setPowerupEarned(false)
       return
@@ -299,6 +311,7 @@ const Play: React.FC = () => {
           const roomObj = snapshot.val()
           setPlayers(roomObj['players'])
           setKeys(roomObj['keyMap'])
+          setKeysBackup(roomObj['keyMap'])
           setGameDuration(roomObj['gameOptions']['time'])
           setQuoteList(roomObj['quoteList'])
           setCurrentRound(1)
@@ -449,6 +462,11 @@ const Play: React.FC = () => {
   useEffect(() => {
     if (time == 0) {
       endRound()
+    } else if (powerupActive && time <= powerupExpiry) {
+      if (powerup === 2) {
+        setKeys(keysBackup)
+        setPowerupActive(false)
+      }
     }
   }, [time])
 
@@ -502,10 +520,11 @@ const Play: React.FC = () => {
   return (
     <div className={styles.gameWindow}>
       <Timer time={time} />
+      <div>Powerup: {powerups[powerup]['description']}</div>
       {powerupAvailable && powerupMode ? (
         <>
           <div className={styles.textContainerMP}>
-            <p>Powerup Info</p>
+            <p>The first player to finish typing earns the powerup!</p>
             <hr className={styles.separator}></hr>
             <TextDisplay quote={powerupQuote} input={powerupInput} />
           </div>
