@@ -7,6 +7,7 @@ import { useAuth } from 'hooks/useAuth'
 import { Keyboard, Timer, TextDisplay } from 'components'
 import { GameEnd } from 'components/game/GameEnd'
 import { RoundStarting } from 'components/game/RoundStarting'
+import { powerups } from 'components/powerups/powerups'
 
 import styles from 'components/game/Game.module.css'
 
@@ -16,24 +17,6 @@ export interface GameOptions {
   withinRow: boolean
   time: number
   numberOfRounds: number
-}
-
-const powerups: { [input: number]: { [input: string]: string } } = {
-  1: {
-    name: 'skip',
-    text: 'skip',
-    description: 'Skip word',
-  },
-  2: {
-    name: 'unscramble',
-    text: 'unscramble',
-    description: 'Unscramble keyboard for 10 seconds',
-  },
-  3: {
-    name: 'hide',
-    text: 'hide keyboard',
-    description: "Hide opponent's keyboard for 10 seconds",
-  },
 }
 
 const mapInput = (keys: keyboardMap, char: string): string => {
@@ -61,7 +44,6 @@ const Play: React.FC = () => {
   const [quoteList, setQuoteList] = useState({})
   const [currentRound, setCurrentRound] = useState(0)
   const [keys, setKeys] = useState<keyboardMap>(unshuffledMap)
-  const [keysBackup, setKeysBackup] = useState<keyboardMap>(unshuffledMap)
   const [players, setPlayers] = useState({})
   const [gameDuration, setGameDuration] = useState(-1)
   const [time, setTime] = useState(-1)
@@ -82,10 +64,11 @@ const Play: React.FC = () => {
   const userInputElement = React.useRef<HTMLInputElement>(null)
 
   const dbPowerupAvailableRef = ref(database, `rooms/${roomId}/powerupAvailable`)
-  const [powerup, setPowerup] = useState(2)
+  const [powerup, setPowerup] = useState(0)
   const [powerupAvailable, setPowerupAvailable] = useState(false)
   const [powerupMode, setPowerupMode] = useState(false)
-  const [powerupQuote, setPowerupQuote] = useState(powerups[powerup]['text'])
+  const [powerupQuote, setPowerupQuote] = useState('')
+  const [powerupDescription, setPowerupDescription] = useState('')
   const [powerupInput, setPowerupInput] = useState('')
   const [powerupCursor, setPowerupCursor] = useState(0)
   const [powerupEarned, setPowerupEarned] = useState(false)
@@ -219,17 +202,17 @@ const Play: React.FC = () => {
     }
     if (powerupEarned && e.ctrlKey) {
       switch (powerup) {
-        case 1:
+        case 0:
           setInput(words[nextWordIndex])
           break
-        case 2:
+        case 1:
           const scrambled = keys
           setKeys(unshuffledMap)
           setTimeout(() => {
             setKeys(scrambled)
           }, 10000)
           break
-        case 3:
+        case 2:
           set(ref(database, `rooms/${roomId}/displayKeyboard/${opponent}`), false)
           break
         default:
@@ -309,11 +292,21 @@ const Play: React.FC = () => {
       set(dbGameStatsRef, gameStatsObj)
       if (user?.uid === roomId) {
         set(dbPowerupAvailableRef, true)
+        set(
+          ref(database, `rooms/${roomId}/powerup`),
+          Math.floor(Math.random() * Object.keys(powerups).length),
+        )
       }
+      setPowerupMode(false)
+      setPowerupInput('')
+      setPowerupCursor(0)
+      setPowerupEarned(false)
+      setShowKeyboard(true)
 
       setNextWordIndex(-1)
       setCurrentRound(currentRound + 1)
       setRoundStart('false')
+      setPowerupAvailable(true)
     }
   }
 
@@ -325,7 +318,6 @@ const Play: React.FC = () => {
           const roomObj = snapshot.val()
           setPlayers(roomObj['players'])
           setKeys(roomObj['keyMap'])
-          setKeysBackup(roomObj['keyMap'])
           setGameDuration(roomObj['gameOptions']['time'])
           setQuoteList(roomObj['quoteList'])
           setCurrentRound(1)
@@ -449,6 +441,18 @@ const Play: React.FC = () => {
         console.log('powerupAvailable not in db')
       }
     })
+
+    onValue(ref(database, `rooms/${roomId}/powerup`), (snapshot) => {
+      if (snapshot.exists()) {
+        console.log(snapshot.val())
+        setPowerup(snapshot.val())
+        setPowerupDescription(powerups[snapshot.val()]['description'])
+        setPowerupQuote(powerups[snapshot.val()]['text'])
+      } else {
+        console.log('powerup not in db')
+      }
+    })
+
     onValue(ref(database, `rooms/${roomId}/displayKeyboard/${user?.uid}`), (snapshot) => {
       if (snapshot.exists()) {
         if (!snapshot.val()) {
@@ -542,7 +546,7 @@ const Play: React.FC = () => {
   return (
     <div className={styles.gameWindow}>
       <Timer time={time} />
-      <div>Powerup: {powerups[powerup]['description']}</div>
+      <div>Powerup: {powerupDescription}</div>
       {powerupAvailable && powerupMode ? (
         <>
           <div className={styles.textContainerMP}>

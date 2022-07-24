@@ -10,6 +10,7 @@ import { Checkbox } from 'components'
 import Slider from 'react-input-slider'
 
 import { defaultGameOptions } from 'components/firebase/RoomFunctions'
+import { powerups } from 'components/powerups/powerups'
 import { generateKeyboard } from 'utils/keyboard'
 
 const Room: React.FC = () => {
@@ -104,6 +105,10 @@ const Room: React.FC = () => {
       set(ref(database, `rooms/${roomId}/gameStats`), gameStats)
       set(ref(database, `rooms/${roomId}/score`), score)
       set(ref(database, `rooms/${roomId}/displayKeyboard`), displayKeyboard)
+      set(
+        ref(database, `rooms/${roomId}/powerup`),
+        Math.floor(Math.random() * Object.keys(powerups).length),
+      )
       set(ref(database, `rooms/${roomId}/started`), true)
     } else {
       alert('Number of players is not 2!')
