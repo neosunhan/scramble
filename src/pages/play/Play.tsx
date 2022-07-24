@@ -308,7 +308,6 @@ const Play: React.FC = () => {
       setNextWordIndex(-1)
       setCurrentRound(currentRound + 1)
       setRoundStart('false')
-      setPowerupAvailable(true)
     }
   }
 
