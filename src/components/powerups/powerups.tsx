@@ -1,7 +1,7 @@
 export const powerups: { [input: number]: { [input: string]: string } } = {
   0: {
     name: 'skip',
-    text: 'Skip word',
+    text: 'Skip',
     description: 'Skip the next word!',
   },
   1: {
@@ -11,7 +11,7 @@ export const powerups: { [input: number]: { [input: string]: string } } = {
   },
   2: {
     name: 'hide',
-    text: "Hide opponent's keyboard",
+    text: "Hidden keyboard",
     description: "Hide opponent's keyboard for 10 seconds!",
   },
 }
