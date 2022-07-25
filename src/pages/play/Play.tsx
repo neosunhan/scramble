@@ -620,7 +620,7 @@ const Play: React.FC = () => {
       {showKeyboard ? (
         <Keyboard keys={keys}></Keyboard>
       ) : (
-        <div className={styles.powerUpTitleUsed}>[ Keyboard hidden by opponent ]</div>
+        <div className={styles.powerUpHideKeyboard}>[ Keyboard hidden by opponent ]</div>
       )}
       {roundStart === 'false' && !gameEnd && (
         <RoundStarting
