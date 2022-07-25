@@ -25,6 +25,26 @@
   width: 100%;
 }
 
+.powerUpTitle {
+  color: orange;
+  font-size: 1.5rem;
+}
+
+.powerUpTitleHas {
+  color: #90ee90;
+  font-size: 1.5rem;
+}
+
+.powerUpTitleUsed {
+  color: red;
+  font-size: 2rem;
+}
+
+.powerupDesc {
+  color: orange;
+  font-size: 1.5rem;
+}
+
 .inputContainer {
   display: flex;
   flex-direction: column;

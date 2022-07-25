@@ -546,22 +546,29 @@ const Play: React.FC = () => {
   return (
     <div className={styles.gameWindow}>
       <Timer time={time} />
-      <p>Powerup: {powerupDescription}</p>
       {powerupAvailable ? (
-        <p>Press CTRL to compete for the powerup!</p>
+        <div className={styles.powerUpTitle}>
+          Press CTRL to compete for the powerup, first to finish earns it!
+        </div>
       ) : powerupEarned ? (
         powerupUsed ? (
-          <p>Powerup used! Look out for the new powerup next round!</p>
+          <div className={styles.powerUpTitleUsed}>
+            Powerup used! Look out for the new powerup next round!
+          </div>
         ) : (
-          <p>Press CTRL before the end of the round to use the Powerup!</p>
+          <div className={styles.powerUpTitleHas}>
+            Press CTRL before the end of the round to use the Powerup!
+          </div>
         )
       ) : (
-        <p>Opponent has earned the powerup. Better luck next time!</p>
+        <div className={styles.powerUpTitleUsed}>
+          Opponent has earned the powerup. Better luck next time!
+        </div>
       )}
       {powerupAvailable && powerupMode ? (
         <>
           <div className={styles.textContainerMP}>
-            <p>The first player to finish typing earns the powerup!</p>
+            <div className={styles.powerupDesc}>{powerupDescription}</div>
             <hr className={styles.separator}></hr>
             <TextDisplay quote={powerupQuote} input={powerupInput} />
           </div>
@@ -610,7 +617,11 @@ const Play: React.FC = () => {
           </div>
         </>
       )}
-      {showKeyboard ? <Keyboard keys={keys}></Keyboard> : <div>Keyboard hidden by opponent</div>}
+      {showKeyboard ? (
+        <Keyboard keys={keys}></Keyboard>
+      ) : (
+        <div className={styles.powerUpTitleUsed}>[ Keyboard hidden by opponent ]</div>
+      )}
       {roundStart === 'false' && !gameEnd && (
         <RoundStarting
           roundResult={roundResult}
