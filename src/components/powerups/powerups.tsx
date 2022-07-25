@@ -11,7 +11,7 @@ export const powerups: { [input: number]: { [input: string]: string } } = {
   },
   2: {
     name: 'hide',
-    text: "Hidden keyboard",
+    text: 'Hidden keyboard',
     description: "Hide opponent's keyboard for 10 seconds!",
   },
 }
