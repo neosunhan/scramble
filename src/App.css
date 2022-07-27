@@ -43,3 +43,7 @@ table {
 }
 
 html * {max-height:1000000px;}
+
+html {
+	font-size: 12px;
+}
