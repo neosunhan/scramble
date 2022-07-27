@@ -10,7 +10,7 @@
     justify-content: center;
     height: 100%;
     width: 80%; 
-    gap: 18rem;
+    gap: 10rem;
     margin: auto;
     padding: 0% 5%;
 }
@@ -18,7 +18,7 @@
 .roomHeader {
     display: flex;
     flex-direction: column;
-    font-size: 3.5rem;
+    font-size: 3.25rem;
     align-items: center;
     align-self: center;
     color: orange;
@@ -34,7 +34,7 @@
    width: 30%;
    font-size: 1.875rem;
    color: black;
-   max-height: 50%;
+   max-height: 62%;
 }
 
 .lobbyContainer {
@@ -73,7 +73,7 @@
     flex: 1;
     gap: 2rem;
     text-align: center;
-    font-size: 1.5rem;
+    font-size: 1.25rem;
 }
 
 .settingsForm {
@@ -81,10 +81,10 @@
 }
 
 .settingsContainer {
-    font-size: 1.25rem;
+    font-size: 1.125rem;
     display: flex;
     flex-direction: column;
-    gap: 3rem;
+    gap: 1.5rem;
     flex: 1;
     padding: 1.25rem 0 1.5rem 1.25rem;
 }
@@ -92,7 +92,7 @@
 .scramblingMode {
     display: flex;
     flex-direction: column;
-    gap: 1.5rem;
+    gap: 1.25rem;
 }
 
 .scramblingOptions {
@@ -108,7 +108,7 @@
 }
 
 .settingsTitle {
-    font-size: 1.5rem;
+    font-size: 1.125rem;
     font-weight: bold;
 }
 
