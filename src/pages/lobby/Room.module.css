@@ -1,7 +1,7 @@
 .room {
     background-color: rgb(50, 52, 55);
     height: 100vh;
-    padding: 7% 0%; 
+    padding: 4rem 0; 
 }
 
 .roomContainer {
@@ -12,7 +12,7 @@
     width: 80%; 
     gap: 7.5rem;
     margin: auto;
-    padding: 0 3.125rem;
+    padding: 0 5%;
 }
 
 .roomHeader {
@@ -79,9 +79,8 @@
     display: flex;
     flex-direction: column;
     gap: 0.625rem;
-    padding: 1.5625rem 1.5625rem;
     flex: 1;
-    padding: 1.25rem 0 0 1.25rem;
+    padding: 1.25rem 0 1.5rem 1.25rem;
 }
 
 .settingsForm {

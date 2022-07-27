@@ -271,11 +271,6 @@ const Room: React.FC = () => {
                 </div>
                 <div className={styles.sliderContainer}>
                   <Slider
-                    styles={{
-                      track: {
-                        width: 370,
-                      },
-                    }}
                     axis='x'
                     xmin={5}
                     xmax={300}
@@ -291,11 +286,6 @@ const Room: React.FC = () => {
 
                 <div className={styles.sliderContainer}>
                   <Slider
-                    styles={{
-                      track: {
-                        width: 370,
-                      },
-                    }}
                     axis='x'
                     xmin={3}
                     xmax={7}

@@ -23,8 +23,8 @@
     position: relative;
     display: flex;
     flex-direction: column;
-    height: 550px;
-    width: 400px;
+    height: 34.375rem;
+    width: 25rem;
     border: 1rem solid rgb(239, 241, 243);
     border-radius: 10px;
     background-color: white;
@@ -34,19 +34,19 @@
     display: flex;
     justify-content: space-between;
     align-items: center;
-    padding-bottom: 0.3em;
+    padding-bottom: 0.9375rem;
     background-color: rgb(239, 241, 243);
   }
 
   .currentRound {
-    font-size: 32px;
+    font-size: 2rem;
     font-weight: bold;
-    padding: 5px;
+    padding: 0.3125rem;
   }
 
   .scoreBoard {
-      font-size: 40px;
-      padding: 5px; 
+      font-size: 2.5rem;
+      padding: 0.3125rem; 
   }
 
   .won {
@@ -54,16 +54,16 @@
   }
 
   .startingMessage {
-    margin-top: 30px;
+    margin-top: 1.875rem;
     text-align: center;
-    font-size: 25px;
+    font-size: 1.5625rem;
   }
   
   .countdownTime {
-      font-size: 35px;
+      font-size: 2.1875rem;
       text-align: center;
-      margin-top: 20px;
-      margin-bottom: 5px;
+      margin-top: 1.25rem;
+      margin-bottom: 0.3125rem;
       color: red;
   }
 
@@ -73,33 +73,33 @@
     flex-direction: column;
     justify-content: space-around;
     align-items: center;
-    padding: 20px;
+    padding: 1.25rem;
   }
 
   .roundResult {
     text-align: center; 
-    font-size: 24px;
+    font-size: 1.5rem;
     font-weight: 500;
   }
 
   .statsTitle {
-    margin-top: -10px;
+    margin-top: -0.625rem;
     text-align: center;
-    font-size: 21px;
+    font-size: 1.3125rem;
   }
 
   .wpmContainer {
     display: flex;
     flex-direction: column;
     align-items: center;
-    gap: 5px;
+    gap: 0.3125rem;
   }
 
   .wpmTitle {
-    font-size: 20px;
+    font-size: 1.25rem;
     font-weight: bold;
   }
 
   .wpm {
-    font-size: 25px;
+    font-size: 1.5625rem;
   }
