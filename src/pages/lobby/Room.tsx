@@ -231,45 +231,48 @@ const Room: React.FC = () => {
           ) : (
             <form className={styles.settingsForm}>
               <div className={styles.settingsContainer}>
-                <div className={styles.settingsTitle}>Scrambling Mode</div>
-                <Checkbox
-                  name='noShuffle'
-                  label='Keyboard shuffle'
-                  checked={!rightSettings().noShuffle}
-                  onClick={(e) => {
-                    e.preventDefault()
-                    setSettings({ ...settings, noShuffle: !settings.noShuffle })
-                  }}
-                />
-                {!rightSettings().noShuffle && (
-                  <Checkbox
-                    name='withinHand'
-                    label='Shuffle within hands'
-                    checked={rightSettings().withinHand}
-                    onClick={(e) => {
-                      e.preventDefault()
-                      setSettings({ ...settings, withinHand: !settings.withinHand })
-                    }}
-                  />
-                )}
+                <div className={styles.scramblingMode}>
+                  <div className={styles.settingsTitle}>Scrambling Mode</div>
+                  <div className={styles.scramblingOptions}>
+                    <Checkbox
+                      name='noShuffle'
+                      label='Keyboard shuffle'
+                      checked={!rightSettings().noShuffle}
+                      onClick={(e) => {
+                        e.preventDefault()
+                        setSettings({ ...settings, noShuffle: !settings.noShuffle })
+                      }}
+                    />
+                    {!rightSettings().noShuffle && (
+                      <Checkbox
+                        name='withinHand'
+                        label='Shuffle within hands'
+                        checked={rightSettings().withinHand}
+                        onClick={(e) => {
+                          e.preventDefault()
+                          setSettings({ ...settings, withinHand: !settings.withinHand })
+                        }}
+                      />
+                    )}
 
-                {!rightSettings().noShuffle && (
-                  <Checkbox
-                    name='withinRow'
-                    label='Shuffle within row'
-                    checked={rightSettings().withinRow}
-                    onClick={(e) => {
-                      e.preventDefault()
-                      setSettings({ ...settings, withinRow: !settings.withinRow })
-                    }}
-                  />
-                )}
-                <hr />
-                <div className={styles.settingsTitle}>
-                  Time Setting: &nbsp;&nbsp;
-                  <span id='time-setting'>{rightSettings().time}</span>
+                    {!rightSettings().noShuffle && (
+                      <Checkbox
+                        name='withinRow'
+                        label='Shuffle within row'
+                        checked={rightSettings().withinRow}
+                        onClick={(e) => {
+                          e.preventDefault()
+                          setSettings({ ...settings, withinRow: !settings.withinRow })
+                        }}
+                      />
+                    )}
+                  </div>
                 </div>
                 <div className={styles.sliderContainer}>
+                  <div className={styles.settingsTitle}>
+                    Time Setting: &nbsp;&nbsp;
+                    <span id='time-setting'>{rightSettings().time}</span>
+                  </div>
                   <Slider
                     axis='x'
                     xmin={5}
@@ -279,12 +282,11 @@ const Room: React.FC = () => {
                     onChange={({ x }) => setSettings({ ...settings, time: x })}
                   />
                 </div>
-                <div className={styles.settingsTitle}>
-                  Number of Rounds: &nbsp;&nbsp;
-                  <span id='time-setting'>{rightSettings().numberOfRounds}</span>
-                </div>
-
                 <div className={styles.sliderContainer}>
+                  <div className={styles.settingsTitle}>
+                    Number of Rounds: &nbsp;&nbsp;
+                    <span id='time-setting'>{rightSettings().numberOfRounds}</span>
+                  </div>
                   <Slider
                     axis='x'
                     xmin={3}
