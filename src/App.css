@@ -44,6 +44,32 @@ table {
 
 html * {max-height:1000000px;}
 
-html {
-	font-size: 12px;
+@media (-webkit-min-device-pixel-ratio: 1) {
+	html {
+		font-size: 16px;
+	}
+}
+
+@media (-webkit-min-device-pixel-ratio: 1.25) {
+	html {
+		font-size: 13px;
+	}
+}
+
+@media (-webkit-min-device-pixel-ratio: 1.5) {
+	html {
+		font-size: 10px;
+	}
+}
+
+@media (-webkit-min-device-pixel-ratio: 1.75) {
+	html {
+		font-size: 8px;
+	}
+}
+
+@media (-webkit-min-device-pixel-ratio: 2) {
+	html {
+		font-size: 7px;
+	}
 }
