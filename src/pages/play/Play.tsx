@@ -112,15 +112,7 @@ const Play: React.FC = () => {
   const [countdownTime, setCountdownTime] = useState(5)
   const [numberOfRounds, setNumberOfRounds] = useState(7)
   const [roundResult, setRoundResult] = useState('Tied')
-  const startCountdown = () => {
-    const countdownStart = Date.now()
-    setCountdown(
-      setInterval(() => {
-        const difference = Math.floor((Date.now() - countdownStart) / 1000)
-        setCountdownTime(5 - difference)
-      }, 100),
-    )
-  }
+  const countdownIntervals: NodeJS.Timer[] = []
 
   const insertTextAtCursor = (
     prev: string,
@@ -400,15 +392,30 @@ const Play: React.FC = () => {
         }
       })
 
+      onValue(ref(database, `rooms/${roomId}/timers/countdown`), (snapshot) => {
+        if (snapshot.exists()) {
+          const startAt = snapshot.val()
+          const tempInterval = setInterval(() => {
+            const timeLeft = Math.ceil((5 * 1000 - (Date.now() - startAt + timeOffset)) / 1000)
+            if (timeLeft < 0) {
+              clearInterval(tempInterval)
+            } else {
+              setCountdownTime(timeLeft)
+            }
+          }, 100)
+          setCountdown(tempInterval)
+          countdownIntervals.forEach((e) => clearInterval(e))
+          countdownIntervals.push(tempInterval)
+        }
+      })
+
       onValue(ref(database, `rooms/${roomId}/timers/game`), (snapshot) => {
         if (snapshot.exists()) {
-          console.log('Setting timer')
           const startAt = snapshot.val()
           const tempInterval = setInterval(() => {
             const timeLeft = Math.ceil(
               (gameDuration * 1000 - (Date.now() - startAt + timeOffset)) / 1000,
             )
-            console.log(timeLeft)
             if (timeLeft < 0) {
               clearInterval(tempInterval)
             } else {
@@ -520,7 +527,10 @@ const Play: React.FC = () => {
       if (roundStart === 'false') {
         setInput('')
         set(dbInputRef, '')
-        startCountdown()
+        if (user?.uid == roomId) {
+          set(ref(database, `rooms/${roomId}/timers/countdown`), serverTimestamp())
+        }
+        //startCountdown()
         userInputElement.current?.blur()
       } else if (roundStart === 'true') {
         userInputElement.current?.focus()
