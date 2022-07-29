@@ -1,7 +1,7 @@
 import React, { useEffect, useState } from 'react'
 import { keyboardMap, unshuffledMap } from 'utils/keyboard'
-import { get, ref, onValue, set, increment } from 'firebase/database'
-import { database } from 'config/firebaseConfig'
+import { get, ref, onValue, set, increment, serverTimestamp } from 'firebase/database'
+import { database, firebaseAuth } from 'config/firebaseConfig'
 import { useParams } from 'react-router-dom'
 import { useAuth } from 'hooks/useAuth'
 import { Keyboard, Timer, TextDisplay } from 'components'
@@ -10,6 +10,8 @@ import { RoundStarting } from 'components/game/RoundStarting'
 import { powerups } from 'components/powerups/powerups'
 
 import styles from 'components/game/Game.module.css'
+import { off } from 'process'
+import { clear } from 'console'
 
 export interface GameOptions {
   noShuffle: boolean
@@ -47,12 +49,13 @@ const Play: React.FC = () => {
   const [players, setPlayers] = useState({})
   const [gameDuration, setGameDuration] = useState(-1)
   const [time, setTime] = useState(-1)
-  const [startTime, setStartTime] = useState(-1)
+  const [timeOffset, setTimeOffset] = useState(-1)
   const [timer, setTimer] = useState(
     setInterval(() => {
       return
     }, 1000),
   )
+  const intervals: NodeJS.Timer[] = []
 
   const [opponent, setOpponent] = useState('')
   const [input, setInput] = useState('')
@@ -334,6 +337,12 @@ const Play: React.FC = () => {
         setScoreBoard(snapshot.val())
       }
     })
+
+    onValue(ref(database, '.info/serverTimeOffset'), (snapshot) => {
+      if (snapshot.exists()) {
+        setTimeOffset(snapshot.val())
+      }
+    })
   }, [])
 
   useEffect(() => {
@@ -350,23 +359,12 @@ const Play: React.FC = () => {
         setTime(gameDuration)
       }
       if (gameDuration >= 0 && roundStart === 'true') {
-        setStartTime(Date.now())
+        if (user?.uid == roomId) {
+          set(ref(database, `rooms/${roomId}/timers/game`), serverTimestamp())
+        }
       }
     }
   }, [gameDuration, roundStart])
-
-  useEffect(() => {
-    if (!gameEnd) {
-      if (gameDuration >= 0 && startTime >= 0) {
-        setTimer(
-          setInterval(() => {
-            const difference = Math.floor((Date.now() - startTime) / 1000)
-            setTime(gameDuration - difference)
-          }, 100),
-        )
-      }
-    }
-  }, [startTime])
 
   useEffect(() => {
     if (Object.keys(players).length !== 0) {
@@ -399,6 +397,27 @@ const Play: React.FC = () => {
       onValue(ref(database, `rooms/${roomId}/roundStats/${opponent}`), (snapshot) => {
         if (snapshot.exists()) {
           setOpponentRoundStats(snapshot.val())
+        }
+      })
+
+      onValue(ref(database, `rooms/${roomId}/timers/game`), (snapshot) => {
+        if (snapshot.exists()) {
+          console.log('Setting timer')
+          const startAt = snapshot.val()
+          const tempInterval = setInterval(() => {
+            const timeLeft = Math.ceil(
+              (gameDuration * 1000 - (Date.now() - startAt + timeOffset)) / 1000,
+            )
+            console.log(timeLeft)
+            if (timeLeft < 0) {
+              clearInterval(tempInterval)
+            } else {
+              setTime(timeLeft)
+            }
+          }, 100)
+          setTimer(tempInterval)
+          intervals.forEach((e) => clearInterval(e))
+          intervals.push(tempInterval)
         }
       })
     }
