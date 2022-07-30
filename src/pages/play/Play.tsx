@@ -83,6 +83,8 @@ const Play: React.FC = () => {
   const [words, setWords] = useState(['@'])
   const [nextWordIndex, setNextWordIndex] = useState(-1)
 
+  const dbRoundStartedRef = ref(database, `rooms/${roomId}/roundStarted`)
+  const dbCurrentRoundRef = ref(database, `rooms/${roomId}/currentRound`)
   const dbRoundStatsRef = ref(database, `rooms/${roomId}/roundStats/${user?.uid}`)
   const dbGameStatsRef = ref(database, `rooms/${roomId}/gameStats/${user?.uid}`)
   const dbScoreRef = ref(database, `rooms/${roomId}/score/${user?.uid}`)
@@ -103,7 +105,7 @@ const Play: React.FC = () => {
   })
   const [scoreBoard, setScoreBoard] = useState({})
 
-  const [roundStart, setRoundStart] = useState('@')
+  const [roundStart, setRoundStart] = useState(false)
   const [countdown, setCountdown] = useState(
     setInterval(() => {
       return
@@ -271,43 +273,42 @@ const Play: React.FC = () => {
   }
 
   const endRound = () => {
-    if (roundStart && !gameEnd) {
-      clearInterval(timer)
-      const wordsLeft = !quoteLeft ? 0 : quoteLeft.split(' ').length
-      const wordCount = words.length - wordsLeft
-      const gameTime = gameDuration - time
-      const statsObj = {
-        wordCount,
-        gameTime,
-        round: currentRound,
-      }
-      const gameStatsObj = sumStats(statsObj, gameStats)
-      setRoundStats(statsObj)
-      set(dbRoundStatsRef, statsObj)
-      setGameStats(gameStatsObj)
-      set(dbGameStatsRef, gameStatsObj)
-      if (user?.uid === roomId) {
-        set(dbPowerupAvailableRef, true)
-        set(
-          ref(database, `rooms/${roomId}/powerup`),
-          Math.floor(Math.random() * Object.keys(powerups).length),
-        )
-      }
-      setPowerupMode(false)
-      setPowerupInput('')
-      setPowerupCursor(0)
-      setPowerupEarned(false)
-      setPowerupUsed(false)
-      setShowKeyboard(true)
+    clearInterval(timer)
+    const wordsLeft = !quoteLeft ? 0 : quoteLeft.split(' ').length
+    const wordCount = words.length - wordsLeft
+    const gameTime = gameDuration - time
+    const statsObj = {
+      wordCount,
+      gameTime,
+      round: currentRound,
+    }
+    const gameStatsObj = sumStats(statsObj, gameStats)
+    setRoundStats(statsObj)
+    set(dbRoundStatsRef, statsObj)
+    setGameStats(gameStatsObj)
+    set(dbGameStatsRef, gameStatsObj)
+    if (user?.uid === roomId) {
+      set(dbPowerupAvailableRef, true)
+      set(
+        ref(database, `rooms/${roomId}/powerup`),
+        Math.floor(Math.random() * Object.keys(powerups).length),
+      )
+    }
+    setPowerupMode(false)
+    setPowerupInput('')
+    setPowerupCursor(0)
+    setPowerupEarned(false)
+    setPowerupUsed(false)
+    setShowKeyboard(true)
 
-      setNextWordIndex(-1)
-      setCurrentRound(currentRound + 1)
-      setRoundStart('false')
+    setNextWordIndex(-1)
+    if (user?.uid === roomId) {
+      set(dbCurrentRoundRef, increment(1))
+      set(dbRoundStartedRef, false)
     }
   }
 
   useEffect(() => {
-    setRoundStart('false')
     get(ref(database, `rooms/${roomId}`))
       .then((snapshot) => {
         if (snapshot.exists()) {
@@ -316,13 +317,24 @@ const Play: React.FC = () => {
           setKeys(roomObj['keyMap'])
           setGameDuration(roomObj['gameOptions']['time'])
           setQuoteList(roomObj['quoteList'])
-          setCurrentRound(1)
           setNumberOfRounds(roomObj['gameOptions']['numberOfRounds'])
         }
       })
       .catch((error) => {
         console.error(error)
       })
+
+    onValue(dbRoundStartedRef, (snapshot) => {
+      if (snapshot.exists()) {
+        setRoundStart(snapshot.val())
+      }
+    })
+
+    onValue(dbCurrentRoundRef, (snapshot) => {
+      if (snapshot.exists()) {
+        setCurrentRound(snapshot.val())
+      }
+    })
 
     onValue(ref(database, `rooms/${roomId}/score`), (snapshot) => {
       if (snapshot.exists()) {
@@ -339,7 +351,10 @@ const Play: React.FC = () => {
 
   useEffect(() => {
     if (countdownTime === 0 && !gameEnd) {
-      setRoundStart('true')
+      if (user?.uid === roomId) {
+        set(dbRoundStartedRef, true)
+        set(ref(database, `rooms/${roomId}/timers/game`), serverTimestamp())
+      }
       clearInterval(countdown)
       setCountdownTime(5)
     }
@@ -347,13 +362,8 @@ const Play: React.FC = () => {
 
   useEffect(() => {
     if (!gameEnd) {
-      if (roundStart === 'false') {
+      if (!roundStart) {
         setTime(gameDuration)
-      }
-      if (gameDuration >= 0 && roundStart === 'true') {
-        if (user?.uid == roomId) {
-          set(ref(database, `rooms/${roomId}/timers/game`), serverTimestamp())
-        }
       }
     }
   }, [gameDuration, roundStart])
@@ -432,14 +442,16 @@ const Play: React.FC = () => {
 
   useEffect(() => {
     if (!gameEnd) {
-      if (quoteList && currentRound > 0) {
+      if (Object.keys(quoteList).length > 0 && currentRound > 0) {
         if (currentRound > numberOfRounds) {
           setGameEnd(true)
         }
         const currentQuote: string = quoteList[currentRound as keyof typeof quoteList]
         set(dbQuoteLeftRef, currentQuote)
         setQuoteLeft(currentQuote)
-        setWords(currentQuote.split(' ').map((s) => s + ' '))
+        setWords(
+          currentQuote.split(' ').map((s, index, arr) => (index == arr.length - 1 ? s : s + ' ')),
+        )
       }
     }
   }, [quoteList, currentRound])
@@ -524,15 +536,14 @@ const Play: React.FC = () => {
 
   useEffect(() => {
     if (!gameEnd) {
-      if (roundStart === 'false') {
+      if (!roundStart) {
         setInput('')
         set(dbInputRef, '')
         if (user?.uid == roomId) {
           set(ref(database, `rooms/${roomId}/timers/countdown`), serverTimestamp())
         }
-        //startCountdown()
         userInputElement.current?.blur()
-      } else if (roundStart === 'true') {
+      } else if (roundStart) {
         userInputElement.current?.focus()
       }
     }
@@ -569,7 +580,12 @@ const Play: React.FC = () => {
   }, [scoreBoard])
 
   useEffect(() => {
-    clearInterval(timer)
+    if (gameEnd) {
+      intervals.forEach((e) => clearInterval(e))
+      countdownIntervals.forEach((e) => clearInterval(e))
+      setQuoteLeft('Game Ended')
+      set(dbQuoteLeftRef, 'Game Ended')
+    }
   }, [gameEnd])
 
   return (
@@ -651,7 +667,7 @@ const Play: React.FC = () => {
       ) : (
         <div className={styles.powerUpHideKeyboard}>[ Keyboard hidden by opponent ]</div>
       )}
-      {roundStart === 'false' && !gameEnd && (
+      {!roundStart && !gameEnd && (
         <RoundStarting
           roundResult={roundResult}
           round={currentRound}
