@@ -36,6 +36,8 @@ const GameEnd: React.FC<GameEndProps> = ({ opponent }) => {
       ...snapshot,
       players: {},
       started: false,
+      roundStarted: false,
+      currentRound: 1,
       gameOptions: defaultGameOptions,
       quoteList: 'Cannot get quote',
       keyMap: generateKeyboard(defaultGameOptions),
@@ -61,7 +63,6 @@ const GameEnd: React.FC<GameEndProps> = ({ opponent }) => {
     get(ref(database, `rooms/${roomId}`))
       .then((snapshot) => {
         if (snapshot.exists()) {
-          setRoomSnapshot(snapshot.val())
           resetRoom(snapshot.val())
         }
       })
@@ -72,11 +73,17 @@ const GameEnd: React.FC<GameEndProps> = ({ opponent }) => {
     onValue(roomRef, (snapshot) => {
       if (snapshot.exists()) {
         const roomObj = snapshot.val()
-        if (roomObj['players']) {
-          setHostRematch(1)
-        } else if (roomObj['deleted']) {
+        if (!roomObj['deleted']) {
+          console.log('Not deleted')
+          console.log(snapshot.val())
+          setRoomSnapshot(snapshot.val())
+        } else {
           setHostRematch(-1)
           remove(roomRef)
+        }
+
+        if (roomObj['players']) {
+          setHostRematch(1)
         }
       }
     })
@@ -98,6 +105,12 @@ const GameEnd: React.FC<GameEndProps> = ({ opponent }) => {
       const words: number = userStats['wordCount']
       const opponentWords: number = opponentStats['wordCount']
       const gameTime: number = userStats['gameTime']
+
+      console.log('Calculating wpm')
+      console.log(gameStats)
+      console.log(opponentWords)
+      console.log(gameTime)
+      console.log(((words * 60.0) / gameTime).toFixed(2))
 
       setWpm(((words * 60.0) / gameTime).toFixed(2))
       setOpponentWpm(((opponentWords * 60.0) / gameTime).toFixed(2))

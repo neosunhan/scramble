@@ -8,7 +8,7 @@ interface TimerProps {
 const Timer: React.FC<TimerProps> = ({ time }) => {
   return (
     <div className={styles.timer} id='timer'>
-      {time}
+      {time >= 0 ? time : ''}
     </div>
   )
 }
