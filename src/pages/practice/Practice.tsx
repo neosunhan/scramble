@@ -42,6 +42,7 @@ const Practice: React.FC = () => {
     if (time === 0 && started) {
       setStartTime(Date.now())
       setStarted(false)
+      setTime(options.time)
       getQuote().then((response) => {
         setQuote(response.data.content)
       })
@@ -63,7 +64,14 @@ const Practice: React.FC = () => {
 
   return (
     <div>
-      <Game keys={keys} quote={quote} time={time} started={started} startGame={startGame} />
+      <Game
+        keys={keys}
+        quote={quote}
+        time={time}
+        started={started}
+        startGame={startGame}
+        setTime={setTime}
+      />
       {popupOpen && (
         <PracticePopup toggleClose={() => setPopupOpen(false)} onSubmit={loadOptions} />
       )}

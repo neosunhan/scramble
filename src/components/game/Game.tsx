@@ -9,6 +9,7 @@ interface GameProps {
   time: number
   started: boolean
   startGame: () => void
+  setTime: React.Dispatch<React.SetStateAction<number>>
 }
 
 const mapInput = (keys: keyboardMap, char: string): string => {
@@ -30,7 +31,7 @@ function isOtherKey(str: string) {
   return str.length === 1 && str.match(/[!"#$%&'()*+,-./:;<=>?@[\\\]^_`{|}~123456789 \b]/)
 }
 
-const Game: React.FC<GameProps> = ({ keys, quote, time, started, startGame }) => {
+const Game: React.FC<GameProps> = ({ keys, quote, time, started, startGame, setTime }) => {
   const [input, setInput] = useState('')
   const [cursor, setCursor] = useState(0)
   const userInputElement = React.useRef<HTMLInputElement>(null)
@@ -90,6 +91,13 @@ const Game: React.FC<GameProps> = ({ keys, quote, time, started, startGame }) =>
       setInput('')
     }
   }, [started])
+
+  useEffect(() => {
+    if (input === quote) {
+      setTime(0)
+      setInput('')
+    }
+  }, [input])
 
   return (
     <div className={styles.gameWindow}>
